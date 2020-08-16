@@ -1,0 +1,11 @@
+{
+	"name": "dm-bot",
+	"version": "1.0.0",
+	"description": "Dungeon Master",
+	"main": "bot.js",
+	"author": "Gabriela Gonzalez (serenamidori)",
+	"dependencies": {
+		"discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+		"winston": "^3.3.3"
+	}
+}

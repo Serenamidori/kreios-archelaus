@@ -40,8 +40,8 @@ var npcAttitude = ["They are hostile towards you.", "They are neutral towards yo
 // [0] Races (common), [1] Races (uncommon), [2] Races (monster), [3] Classes, [4] Genders, [5] Color, [6] Hair length, [7] Height, [8] Weight, [9] Misc.
 var npcBuild = [
 	["human", "elf", "dwarf", "half-elf", "gnome", "halfling", "drow"],
-	["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg"],
-	["goblin", "hobgoblin", "bugbear", "kobold"],
+	["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg", "centaur", "satyr"],
+	["goblin", "hobgoblin", "bugbear", "kobold", "yuan-ti"],
 	["wizard", "fighter", "sorcerer", "warlock", "paladin", "cleric", "barbarian", "bard", "artificer", "ranger", "druid", "monk", "rogue"],
 	["male", "female", "nonbinary"],
 	["black", "white", "brown", "orange", "red", "pink", "blue", "purple", "green", "yellow"],
@@ -132,19 +132,20 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 				break;
 			case 'npc':
 			case 'n':
-				console.log(args);
 				if (args.length == 0) {
 					bot.sendMessage({ to: channelId, message: atUser(userId) + 'Please specify what you\'d like to know about this NPC.\n**attitude (a)** - Gives the demeanor of the NPC towards you.\n**build (b)** - Creates a random NPC description to work with.' }); 
 				}
 				// build
 				if (contains(args, 'build') || contains(args, 'b')) {
 					var npc = "**New NPC**";
-
+					
 					var raceArray = npcBuild[0];
 					if (contains(args, 'uncommon') || contains(args, 'u')) {
-						raceArray.concat(npcBuild[1]);
-					} else if (contains(args, 'monster') || contains(args, 'm')) {
-						raceArray.concat(npcBuild[2]);
+						raceArray = raceArray.concat(npcBuild[1]);
+					} if (contains(args, 'rare') || contains(args, 'r')) {
+						raceArray = raceArray.concat(npcBuild[2]);
+					} if (contains(args, 'monster') || contains(args, 'm')) {
+						raceArray = npcBuild[2];
 					}
 					npc += "\nRace: " + raceArray[rand(raceArray.length)-1];
 

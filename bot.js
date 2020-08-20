@@ -25,13 +25,30 @@ var responses = [
 ];
 
 // Intervention table
-var interventions = ["New Entity","Entity Positive","Entity Negative","Advance Plot","Regress Plot","Wild"];
+var interventions = [
+	"New Entity\n> An entity refers to any person or group of persons that are remotely autonomous, not simply specific NPCs and monsters. For inspirations, I recommend using `!npc` commands or `!portent`",
+	"Entity Positive\n> Something good happens to an entity, the specifics of which can be determined by asking questions using `!oracle`",
+	"Entity Negative\n> Something bad happens to an entity, the specifics of which can be determined by asking questions using `!oracle`",
+	"Advance Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Advancing a plot pushes an unresolved hook forward.",
+	"Regress Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Regressing a plot should help the adventure progress, just by hindering a certain goal or plot point.",
+	"Wild\n> Something unexpected! This is the option that allows for sudden twists of fate. Because a wild Intervention is so vague in what it can represent, I recommend you use `!portent` to figure out what the heck it actually means."
+];
 
 // Oracle table
 var oracle = ["No, and...", "No.", "No, but...", "Yes, but...", "Yes.", "Yes, and..."];
 
 // TWENE table
-var twene = ["Let's increase a simple element.", "Let's decrease a simple element.", "Let's add a simple element.", "Let's remove a simple element.", "Let's increase a major element.", "Let's decrease a major element.", "Let's add a major element.", "Let's remove a major element.", "Let's try a wild positive!", "Let's try a wild negative!"];
+var twene = [
+	"Let's **increase a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
+	"Let's **decrease a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
+	"Let's **add a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element now exists in the scene that you weren’t previously aware of.", 
+	"Let's **remove a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element that should normally exist in the scene does not exist here.", 
+	"Let's **increase a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
+	"Let's **decrease a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
+	"Let's **add a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element now exists in the scene that you weren’t previously aware of.", 
+	"Let's **remove a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element that should normally exist in the scene does not exist here.", 
+	"Let's try a **wild positive!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is positive, but because it can be a little obscure, you can use `!portent` to help decide what happens next.", 
+	"Let's try a **wild negative!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is negative, but because it can be a little obscure, you can use `!portent` to help decide what happens next"];
 
 // NPC Attitude table
 var npcAttitude = ["They are hostile towards you.", "They are neutral towards you.", "They are friendly towards you."];
@@ -40,7 +57,7 @@ var npcAttitude = ["They are hostile towards you.", "They are neutral towards yo
 // [0] Races (common), [1] Races (uncommon), [2] Races (monster), [3] Classes, [4] Genders, [5] Color, [6] Hair length, [7] Height, [8] Weight, [9] Misc.
 var npcBuild = [
 	["human", "elf", "dwarf", "half-elf", "gnome", "halfling", "drow"],
-	["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg", "centaur", "satyr"],
+	["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg", "centaur", "satyr", "pixie", "sprite", " goliath"],
 	["goblin", "hobgoblin", "bugbear", "kobold", "yuan-ti"],
 	["wizard", "fighter", "sorcerer", "warlock", "paladin", "cleric", "barbarian", "bard", "artificer", "ranger", "druid", "monk", "rogue"],
 	["male", "female", "nonbinary"],
@@ -100,11 +117,18 @@ function contains (array, string) {
 // Adds an intervention point to the score and handles when we reach 3
 function addInterventionPoint (channelId) {
 	interventionPoints++;
+	var responses = [
+		"Surprise!", "Time for an", "Look out!", "BOO!"
+	];
 	if (interventionPoints >= 3) {
-		bot.sendMessage({ to: channelId, message: '**Intervention:** ' + interventions[rand(6)-1]});
+		bot.sendMessage({ to: channelId, message: '**' + responses[rand(responses.length-1)] + ' Intervention:** ' + interventions[rand(6)-1]});
 		interventionPoints = 0;
 	}
 }
+
+function containsWord(string, word) {
+	return string.match(new RegExp("\\b" + word + "\\b")) != null;
+  }
 
 bot.on('message', function (user, userId, channelId, message, evt) { 
 	
@@ -112,7 +136,7 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 	if (userId == bot.id) return;
 
 	// heh, nice
-	if (message.toLowerCase().includes('69') && !message.toLowerCase().includes('<@')) { bot.sendMessage({ to: channelId, message: atUser(userId) + 'Heh, _nice_.' }); }
+	if (containsWord(message.toLowerCase(), '69')) { bot.sendMessage({ to: channelId, message: atUser(userId) + 'Heh, _nice_.' }); }
 		
 	// commands
 	if (message.substring(0, 1) == '!' || message.substring(0, 1) == '/') {
@@ -137,7 +161,7 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 				}
 				// build
 				if (contains(args, 'build') || contains(args, 'b')) {
-					var npc = "**New NPC**";
+					var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
 					
 					var raceArray = npcBuild[0];
 					if (contains(args, 'uncommon') || contains(args, 'u')) {
@@ -147,19 +171,19 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 					} if (contains(args, 'monster') || contains(args, 'm')) {
 						raceArray = npcBuild[2];
 					}
-					npc += "\nRace: " + raceArray[rand(raceArray.length)-1];
+					npc += "\n> Race: " + raceArray[rand(raceArray.length)-1];
 
 					if (contains(args, 'class') || contains(args, 'c')) {
-						npc += "\nClass: " + npcBuild[3][rand(npcBuild[3].length)-1];
+						npc += "\n> Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
 					}  
 					//check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
-					npc += "\nGender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
-						"\nHair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-						"\nHair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
-						"\nEye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-						"\nHeight: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
-						"\nWeight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
-						"\nMisc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
+					npc += "\n> Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
+						"\n> Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+						"\n> Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
+						"\n> Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+						"\n> Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
+						"\n> Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
+						"\n> Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
 
 					// TODO: Make this a helper method instead, and take in multiple arguments without issue
 					bot.sendMessage({ to: channelId, message: npc});
@@ -288,7 +312,7 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 				break;
 			case 'help':
 			case 'h':
-				bot.sendMessage({ to: channelId, message: 'I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, use this when something in the scene is unusual, and go from there.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~' }); 
+				bot.sendMessage({ to: channelId, message: 'I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~' }); 
 				break; 
 			case 'intro':
 			case 'i':
@@ -301,52 +325,76 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 		} 
 	} 
 	//addressing the DM
-	else if (message.toLowerCase().includes('dm') || message.toLowerCase().includes('dungeon master') || message.toLowerCase().includes('kreios') || message.toLowerCase().includes('archelaus') || message.toLowerCase().includes(bot.id)) { 
-		// calling him daddy
-		if (message.toLowerCase().includes('daddy')) {
+	else {
+		message = message.toLowerCase();
+		if (containsWord(message, 'dm') ||containsWord(message, 'dungeon master') || containsWord(message, 'kreios') || containsWord(message, 'archelaus')|| message.includes(bot.id)){
+			// calling him daddy
+			if (message.includes('uwu')) {
+				bot.sendMessage({ to: channelId, message: atUser(userId) + " uwu" });
+				return;
+			}
+			// calling him daddy
+			if (containsWord(message, 'daddy')) {
+				var responses = [
+					"**No.** None of that.", "*Absolutely not*."
+				];
+				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
+				return;
+			}
+			// compliments
+			if (containsWord(message, 'cute') || containsWord(message, 'adorable') || containsWord(message, 'handsome') || containsWord(message, 'hot') || containsWord(message, 'sexy')) {
+				var responses = [
+					"Aww~ you flatter me.", "You're making me blush~.", "Why thank you~"
+				];
+				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
+				return;
+			}
+			// fight me
+			if (containsWord(message, 'fight me')) {
+				var responses = [
+					"Alright, I use my Sacred DM Dragon's Flame. It instantly takes out all your remaining HP and kills you super dead. Want to try that again?", "Meet me in the Denny's parking lot.", "You _really_ want to fight the Dungeon Master? _Pff_."
+				];
+				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
+				return;
+			}
+			// fuck you / fuck off
+			if (containsWord(message, 'fuck you') || containsWord(message, 'fuck off')) {
+				var responses = [
+					"_Language._ You kiss your mother with that mouth?", "Is that an invitation? ...oh, no that's you trying to be clever.", "No thanks~", "You roll a natural 1 and die, roll a new character."
+				];
+				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
+				return;
+			}
+			// fuck me
+			if (containsWord(message, 'fuck me')) {
+				var responses = [
+					"My, how forward!", "Oh, I'm sure that will go well for you.", "What, like killing your character? I could do that~"
+				];
+				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
+				return;
+			}
+			// thank you
+			if (containsWord(message, 'thank you') || containsWord(message, 'thank') || containsWord(message, 'thanks')) {
+				var responses = [
+					"You're most welcome.", "But of course.", "Mhm... what did I do?"
+				];
+				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
+				return;
+			}
+			//if it's Lore
+			if (userId == 108393182563213312) {
+				var responses = [
+					"Why hello " + atUser(userId) + "~", "_Mmmmyes " + atUser(userId) + "~?_", "What may I do for you " + atUser(userId) + "?"
+				];
+				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
+				return;
+			}
+			//default responses
 			var responses = [
-				"**No.** None of that.", "*Absolutely not*."
+				"Yes?", "What do you want?", "May I help you?", "Yes, I was paying attention, what?", "_Mmmyes?_", "You rang?", "That's my name, don't wear it out!", "You have my attention~", "I see you, " + atUser(userId), ""
 			];
 			bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-			return;
 		}
-		// calling him cute
-		if (message.toLowerCase().includes('cute') || message.toLowerCase().includes('adorable') || message.toLowerCase().includes('kawaii')) {
-			var responses = [
-				"Aww~ you flatter me.", "You're making me blush~."
-			];
-			bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-			return;
-		}
-		// fight me
-		if (message.toLowerCase().includes('fight me')) {
-			var responses = [
-				"Okay, I use Sacred DM Dragon's Flame. It instantly takes out all your remaining HP and kills you super dead. Want to try that again?", "Meet me in the Denny's parking lot.", "You _really_ want to fight the Dungeon Master? _Pff_."
-			];
-			bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-			return;
-		}
-		// fuck you
-		if (message.toLowerCase().includes('fuck you') || message.toLowerCase().includes('fuck off')) {
-			var responses = [
-				"_Language._ You kiss your mother with that mouth?", "Is that an invitation? ...oh, no that's you trying to be clever.", "No thanks~", "You roll a natural 1 and die, roll a new character."
-			];
-			bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-			return;
-		}
-		// thank you
-		if (message.toLowerCase().includes('thank you') || message.toLowerCase().includes('thank') || message.toLowerCase().includes('thanks')) {
-			var responses = [
-				"You're most welcome.", "But of course.", "Mhm... what did I do?"
-			];
-			bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-			return;
-		}
-		//default responses
-		var responses = [
-			"Yes?", "What do you want?", "May I help you?", "Yes, I was paying attention, what?", "_Mmmyes?_"
-		];
-		bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
 	} 
 }); 
 

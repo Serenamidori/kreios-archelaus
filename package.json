@@ -5,7 +5,10 @@
 	"main": "bot.js",
 	"author": "Gabriela Gonzalez (serenamidori)",
 	"dependencies": {
-		"discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+		"discord.js": "^12.3.1",
+		"dotenv": "^8.2.0",
+		"mongodb": "^3.6.2",
+		"mongoose": "^5.10.6",
 		"winston": "^3.3.3"
 	}
 }

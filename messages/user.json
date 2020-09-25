@@ -1,0 +1,14 @@
+{
+	"questionEdit": {
+		"question": "what would you like to edit?\n`- Personality\n <- Cancel`",
+		"answers": ["personality", "cancel"]
+	},
+	"questionPersonality": {
+		"question": "how would you like me to act towards you?\n`- Normal\n- Kind\n- Flirty\n- Mean`",
+		"answers": ["normal", "kind", "flirty", "mean"]
+	},
+	"normal": "I can do that. I'll act normally then.",
+	"kind": "not to worry, my small friend. I shall be kind to you.",
+	"flirty": "I thought you'd never ask~ Consider it done, cutie.",
+	"mean": "if you insist! I'll pull no punches, my good bitch."
+}

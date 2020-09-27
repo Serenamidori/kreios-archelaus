@@ -113,7 +113,7 @@ function addInterventionPoint (channelId) {
 		"Surprise!", "Time for an", "Look out!", "BOO!"
 	];
 	if (interventionPoints >= 3) {
-		bot.sendMessage({ to: channelId, message: '**' + responses[rand(responses.length-1)] + ' Intervention:** ' + interventions[rand(6)-1]});
+		message.reply(responses[rand(responses.length-1)] + ' Intervention:** ' + interventions[rand(6)-1]);
 		interventionPoints = 0;
 	}
 }
@@ -235,7 +235,7 @@ bot.on('message', message => {
 				// 	}
 				case 'npc':
 					if (args.length == 0) {
-						bot.sendMessage({ to: channelId, message: atUser(userId) + 'Please specify what you\'d like to know about this NPC.\n**attitude (a)** - Gives the demeanor of the NPC towards you.\n**build (b)** - Creates a random NPC description to work with.' }); 
+						message.reply('please specify what you\'d like to know about this NPC.\n**attitude (a)** - Gives the demeanor of the NPC towards you.\n**build (b)** - Creates a random NPC description to work with.'); 
 					}
 					// build
 					if (contains(args, 'build') || contains(args, 'b')) {
@@ -249,26 +249,27 @@ bot.on('message', message => {
 						} if (contains(args, 'monster') || contains(args, 'm')) {
 							raceArray = npcBuild[2];
 						}
-						npc += "\n> Race: " + raceArray[rand(raceArray.length)-1];
+						npc += "```\n Race: " + raceArray[rand(raceArray.length)-1];
 
 						if (contains(args, 'class') || contains(args, 'c')) {
-							npc += "\n> Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
+							npc += "\n Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
 						}  
 						//check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
-						npc += "\n> Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
-							"\n> Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-							"\n> Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
-							"\n> Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-							"\n> Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
-							"\n> Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
-							"\n> Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
+						npc += "\n Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
+							"\n Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+							"\n Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
+							"\n Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+							"\n Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
+							"\n Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
+							"\n Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
 
+						npc = npc + '```';
 						// TODO: Make this a helper method instead, and take in multiple arguments without issue
-						bot.sendMessage({ to: channelId, message: npc});
+						message.reply(npc);
 					}
 					// attitude
 					if (contains(args, 'attitude') || contains(args, 'a')) {
-						bot.sendMessage({ to: channelId, message: atUser(userId) + npcAttitude[rand(3)-1]});
+						message.reply(npcAttitude[rand(3)-1]);
 					}
 					break;
 				case 'oracle':
@@ -281,7 +282,7 @@ bot.on('message', message => {
 					var advantage = contains(args, 'likely') || contains(args, 'l');
 					var disadvantage = contains(args, 'unlikely') || contains(args, 'u');
 					if (advantage && disadvantage) {
-						bot.sendMessage({ to: channelId, message: atUser(userId) + 'You can\'t roll both advantage _and_ disadvantage, silly. Pick one and try again.' });
+						message.reply('you can\'t roll both advantage _and_ disadvantage, silly. Pick one and try again.');
 						break;
 					} else if (advantage || disadvantage) {
 						var roll2 = rand(6);
@@ -294,7 +295,7 @@ bot.on('message', message => {
 							roll = Math.min(roll, roll2);
 						}
 					}
-					bot.sendMessage({ to: channelId, message: atUser(userId) + oracle[roll-1] });
+					message.reply(oracle[roll-1]);
 					// handle intervention points after all rolls
 					for (i = 0; i < ips; i++) {
 						addInterventionPoint(channelId);
@@ -309,102 +310,87 @@ bot.on('message', message => {
 					var word1 = portents[index1][rand(portents[index1].length)-1];
 					var word2 = portents[index2][rand(portents[index2].length)-1];
 
-					bot.sendMessage({ to: channelId, message: atUser(userId) + responses[rand(responses.length-1)] + ': "' + word1 + '" and "' + word2 + '"'});
+					message.reply(responses[rand(responses.length-1)] + ': "' + word1 + '" and "' + word2 + '"');
 					break;
 				case 'twene':
-					bot.sendMessage({ to: channelId, message: atUser(userId) + 'Ah, so things are not as expected? ' + twene[rand(twene.length-1)]});
+					message.reply('Ah, so things are not as expected? ' + twene[rand(twene.length-1)]);
 					break;
 				case 'flip':
 					var coin = rand(2) == 2 ? "heads" : "tails";
-					bot.sendMessage({ to: channelId, message: atUser(userId) + 'I flipped a coin for you, it was ' + coin + '.' });
+					message.reply('I flipped a coin for you, it was ' + coin + '.' );
 					break;
 				case 'kroll':
-					if (parser != "!") { // quick fix for Avrae
-						// set defaults
-						var numbers = [];
-						var total = 0;
-						var count = 1;
-						var sides = 20;
-						var symbol;
-						var bonus;
-						var critSuccess = false;
-						var critFail = false;
-						// set up dice
-						var dice = message.match(/(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/);
-						if (dice) {
-							count = dice[1] ? dice[1] : count;
-							sides = dice[2];
-							symbol = dice[4];
-							bonus = dice[5];
-						}
-						// handle d0 dice
-						if (sides == 0) {
-							bot.sendMessage({ to: channelId, message: atUser(userId) + 'Look- it\'s fucking nothing!' }); 
-							return;
-						}
-						// roll all dice
-						for (i = 0; i < count; i++) {
-							numbers[i] = rand(sides);
-							total += numbers[i];
-							// account for crits
-							critSuccess = critSuccess || numbers[i] == sides;
-							critFail = critFail || numbers[i] == 1;
-						}
-						// apply bonuses
-						if (symbol) {
-							if (symbol == "+") {
-								total += parseInt(bonus);
-							} else {
-								total -= parseInt(bonus);
-							}
-						}				
-						// calculate percentage of success
-						var max = sides * count;
-						var index = 2; // default, 26-74%
-						if (critSuccess && critFail) { // both crit success and crit fail
-							index = 7;
-						} else if (critSuccess && sides == 20) { // crit success
-							index = 6;
-						} else if (critFail && sides == 20) { // crit fail
-							index = 5;
-						} else if (total >= max * .90) { // 91-100%
-							index = 4;
-						} else if (total <= max * .10) { // 0-9%
-							index = 0;	
-						} else if (total >= max * .75) { // 75-90%
-							index = 3;
-						} else if (total <= max * .25) { // 10-25%	
-							index = 1;
-						}
-						bot.sendMessage({ to: channelId, message: atUser(userId) + diceMessage(index, bonus, symbol, count, numbers, sides, total) });
-						// handle nice
-						if (total == 69) {
-							bot.sendMessage({ to: channelId, message: 'Heh, _nice_.' }); 
-						}
+					// set defaults
+					var numbers = [];
+					var total = 0;
+					var count = 1;
+					var sides = 20;
+					var symbol;
+					var bonus;
+					var critSuccess = false;
+					var critFail = false;
+					// set up dice
+					var dice = message.content.match(/(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/);
+					if (dice) {
+						count = dice[1] ? dice[1] : count;
+						sides = dice[2];
+						symbol = dice[4];
+						bonus = dice[5];
 					}
+					// handle d0 dice
+					if (sides == 0) {
+						message.reply('Look- it\'s fucking nothing!'); 
+						return;
+					}
+					// roll all dice
+					for (i = 0; i < count; i++) {
+						numbers[i] = rand(sides);
+						total += numbers[i];
+						// account for crits
+						critSuccess = critSuccess || numbers[i] == sides;
+						critFail = critFail || numbers[i] == 1;
+					}
+					// apply bonuses
+					if (symbol) {
+						if (symbol == "+") {
+							total += parseInt(bonus);
+						} else {
+							total -= parseInt(bonus);
+						}
+					}				
+					// calculate percentage of success
+					var max = sides * count;
+					var index = 2; // default, 26-74%
+					if (critSuccess && critFail) { // both crit success and crit fail
+						index = 7;
+					} else if (critSuccess && sides == 20) { // crit success
+						index = 6;
+					} else if (critFail && sides == 20) { // crit fail
+						index = 5;
+					} else if (total >= max * .90) { // 91-100%
+						index = 4;
+					} else if (total <= max * .10) { // 0-9%
+						index = 0;	
+					} else if (total >= max * .75) { // 75-90%
+						index = 3;
+					} else if (total <= max * .25) { // 10-25%	
+						index = 1;
+					}
+					message.reply(diceMessage(index, bonus, symbol, count, numbers, sides, total));
 					break;
 				case 'commands':
-					bot.sendMessage({ to: channelId, message: 'I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~' }); 
+					message.channel.send('I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~'); 
 					break; 
 				case 'intro':
-					bot.sendMessage({ to: channelId, message: 'I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.' }); 
+					message.channel.send('I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.'); 
 					break; 
 				case 'credits':
-					bot.sendMessage({ to: channelId, message: 'Coding by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]\nPortent Words from [https://wordcounter.net/random-word-generator]' }); 
+					message.channel.send('Code by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]\nPortent Words from [https://wordcounter.net/random-word-generator]'); 
 					break; 
 			} 
 		} 
 	}
 }); 
-
-// (async () => {
-// 	await connect('mongodb://localhost/kreios-archelaus', {
-// 		useNewUrlParser: true,
-// 		useFindAnModify: false
-// 	});
-// 	bot.login(process.env.TOKEN);
-// })
-
 
 mongoose.connect('mongodb+srv://serenamidori:vs46aqp6@cluster0.6hnfq.mongodb.net/kreios-archelaus?retryWrites=true&w=majority', {
 	useNewUrlParser: true,

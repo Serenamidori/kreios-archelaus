@@ -1,7 +1,10 @@
 require('dotenv').config();
 var Discord = require('discord.js');
 var UserModel = require('./models/User');
+var CampaignModel = require('./models/Campaign');
+var InfoModel = require('./models/Info');
 var mongoose = require('mongoose');
+const Campaign = require('./models/Campaign');
 var bot = new Discord.Client();
 
 // String Arrays
@@ -25,9 +28,6 @@ var interventions = [
 	"Regress Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Regressing a plot should help the adventure progress, just by hindering a certain goal or plot point.",
 	"Wild\n> Something unexpected! This is the option that allows for sudden twists of fate. Because a wild Intervention is so vague in what it can represent, I recommend you use `!portent` to figure out what the heck it actually means."
 ];
-
-// Oracle table
-var oracle = ["No, and...", "No.", "No, but...", "Yes, but...", "Yes.", "Yes, and..."];
 
 // TWENE table
 var twene = [
@@ -120,7 +120,7 @@ function addInterventionPoint (channelId) {
 
 function containsWord(string, word) {
 	return string.match(new RegExp("\\b" + word + "\\b")) != null;
-  }
+}
 
 
 bot.on('ready', () => {
@@ -227,18 +227,50 @@ bot.on('message', message => {
 						});			
 					}
 					break;
-				// case 'channel':
-				// 	console.log(args);
-				// 	if (args[0] == 'create') {
-				// 		var type = args[1] ? args[1] : 'text';
-				// 		message.guild.channels.create(`ticket-${message.author.id}`, { type: type }).then(c => {console.log("done")});
-				// 	}
+				case 'campaign':
+					console.log(args);
+					if (args.length == 0) {
+						message.reply('please specify a command.\n**list** - Gives a list of your on-going campaigns.\n**create** - Creates a new campaign.'); 
+					} else if (args[0] == 'list') {
+						//get all sessions for given player
+
+					} else if (args[0] == 'create') {
+						message.reply('let\'s create your campaign then- you\'ll be the leader unless you appoint someone else.\nYou may add features like voice channels, a campaign nickname, or a short desciption by using \'!campaign edit [campaign id]\'');
+
+						InfoModel.findOne({ serverId: message.guild.id }, (err, info) => {
+							if (info) {
+								new CampaignModel({ 
+									id: info.campaignCount + 1, 
+									channelId: null,
+									voiceChannelId: null,
+									name: null,
+									description: null,
+									interventionPoints: 0, 
+									active: true 
+								}).save().then(campaign => {
+									message.guild.channels.create('campaign-' + campaign.id, { type: "text" }).then(channel => {
+										var channel = message.guild.channels.cache.get(channel.id);
+										// console.log(campaign._id);
+										CampaignModel.findByIdAndUpdate(campaign._id, { channelId: channel.id }).then(() => {
+											InfoModel.findByIdAndUpdate(info._id, { campaignCount: info.campaignCount + 1 }).then(() => {
+												//Not sure if this Then is necessary, but it wouldn't update without it :/	
+											});
+										});
+									});
+								});
+							} else {
+								message.reply('whoops, something isn\'t set right on my end, cannot create campaigns at this time.');
+							}
+						});
+					}
+					break;
+					//	message.reply('you\'re not in a session right now. Use \'!campaign list\' to see your available campaigns, and \'!session start [campaign id]\' to start a session for a campaign.');
 				case 'npc':
 					if (args.length == 0) {
-						message.reply('please specify what you\'d like to know about this NPC.\n**attitude (a)** - Gives the demeanor of the NPC towards you.\n**build (b)** - Creates a random NPC description to work with.'); 
+						message.reply('please specify what you\'d like to know about this NPC.\n**attitude** - Gives the demeanor of the NPC towards you.\n**build** - Creates a random NPC description to work with.'); 
 					}
 					// build
-					if (contains(args, 'build') || contains(args, 'b')) {
+					if (args[0] == 'build') {
 						var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
 						
 						var raceArray = npcBuild[0];
@@ -268,23 +300,26 @@ bot.on('message', message => {
 						message.reply(npc);
 					}
 					// attitude
-					if (contains(args, 'attitude') || contains(args, 'a')) {
+					if (args[0] == 'attitude') {
 						message.reply(npcAttitude[rand(3)-1]);
 					}
 					break;
 				case 'oracle':
+					// Make sure a SESSION is going for the player.
+
+
+					const oracle = require('./messages/oracle.json');
+					
 					var ips = 0;
 					var roll = rand(6);
 					if (roll == 6) {
 						ips++;
 					}
+
 					// likeliness/unlikeliness
-					var advantage = contains(args, 'likely') || contains(args, 'l');
-					var disadvantage = contains(args, 'unlikely') || contains(args, 'u');
-					if (advantage && disadvantage) {
-						message.reply('you can\'t roll both advantage _and_ disadvantage, silly. Pick one and try again.');
-						break;
-					} else if (advantage || disadvantage) {
+					var advantage = args[0] === 'likely';
+					var disadvantage = args[0] === 'unlikely';
+					if (advantage || disadvantage) {
 						var roll2 = rand(6);
 						if (roll2 == 6) {
 							ips++;
@@ -295,11 +330,13 @@ bot.on('message', message => {
 							roll = Math.min(roll, roll2);
 						}
 					}
-					message.reply(oracle[roll-1]);
+					message.reply(oracle[roll]);
+
+					//TODO: Add IP to the Session IP counter
 					// handle intervention points after all rolls
-					for (i = 0; i < ips; i++) {
-						addInterventionPoint(channelId);
-					}
+					// for (i = 0; i < ips; i++) {
+					// 	addInterventionPoint(channelId);
+					// }
 					break;
 				case 'portent':
 					var responses = [
@@ -397,7 +434,7 @@ mongoose.connect('mongodb+srv://serenamidori:vs46aqp6@cluster0.6hnfq.mongodb.net
 	useFindAndModify: false
 	}, function (err) {
 	if (err) throw err;
-	console.log('Successfully connected');
+	console.log('Successfully connected to DB');
 	bot.login(process.env.TOKEN);
 });
 

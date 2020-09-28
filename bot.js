@@ -3,6 +3,8 @@ var Discord = require('discord.js');
 var UserModel = require('./models/User');
 var CampaignModel = require('./models/Campaign');
 var InfoModel = require('./models/Info');
+var PlayerModel = require('./models/Player');
+var SessionModel = require('./models/Session');
 var mongoose = require('mongoose');
 const Campaign = require('./models/Campaign');
 var bot = new Discord.Client();
@@ -235,10 +237,10 @@ bot.on('message', message => {
 						//get all sessions for given player
 
 					} else if (args[0] == 'create') {
-						message.reply('let\'s create your campaign then- you\'ll be the leader unless you appoint someone else.\nYou may add features like voice channels, a campaign nickname, or a short desciption by using \'!campaign edit [campaign id]\'');
-
 						InfoModel.findOne({ serverId: message.guild.id }, (err, info) => {
 							if (info) {
+								message.reply('let\'s create your campaign then- you\'ll be the leader unless you appoint someone else.\nYou may add features like voice channels, a campaign nickname, or a short desciption by using \'!campaign edit [campaign id]\'');
+								// create the new campaign
 								new CampaignModel({ 
 									id: info.campaignCount + 1, 
 									channelId: null,
@@ -248,15 +250,41 @@ bot.on('message', message => {
 									interventionPoints: 0, 
 									active: true 
 								}).save().then(campaign => {
+									// campaign created, create new campaign channel
 									message.guild.channels.create('campaign-' + campaign.id, { type: "text" }).then(channel => {
-										var channel = message.guild.channels.cache.get(channel.id);
-										// console.log(campaign._id);
+										// channel created, add to Campaign category if available
+										let category = message.guild.channels.cache.find(c => c.name == "Campaigns" && c.type == "category");
+										if (category) channel.setParent(category.id);
+										// create new campaign role
+										message.guild.roles.create({
+											data: {
+												name: "campaign-" + campaign.id,
+												color: "GREYPLE",
+												mentionable: true
+											},
+											reason:"Campaign creation",
+										}).then((role) => {
+											// role created, add role to user and channel with correct permissions
+											message.member.roles.add(role);
+											channel.updateOverwrite(role, { SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true });
+										}).catch(console.error);
+										
+										// update campaign with channel
 										CampaignModel.findByIdAndUpdate(campaign._id, { channelId: channel.id }).then(() => {
-											InfoModel.findByIdAndUpdate(info._id, { campaignCount: info.campaignCount + 1 }).then(() => {
-												//Not sure if this Then is necessary, but it wouldn't update without it :/	
+											// update server info campaign counter
+											InfoModel.findByIdAndUpdate(info._id, { campaignCount: info.campaignCount + 1 }).then(() => {});
+											// create player model with user and campaign models
+											UserModel.findOne({ discordId: message.author.id }).then(user => {
+												new PlayerModel({
+													userId: user._id,
+													campaignId: campaign._id,
+													leader: true,
+													characters: null,
+													notes: null 
+												}).save()
 											});
 										});
-									});
+									}).catch(console.error);
 								});
 							} else {
 								message.reply('whoops, something isn\'t set right on my end, cannot create campaigns at this time.');

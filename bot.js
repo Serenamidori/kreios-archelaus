@@ -141,22 +141,22 @@ bot.on('message', message => {
 	if (message.channel.id == process.env.BOT_CHANNEL || message.channel.id == process.env.TESTING_CHANNEL) {
 		//const constants = require('./messages/constants.json');
 
-		// commands
-		if (message.content.substring(0, 1) == '!') {
-			var args = message.content.substring(1).split(/ +/);
-			var cmd = args[0]; 
-			args = args.splice(1);
-			switch(cmd) {
-				case '':
-					if (args.length != 0) {
-						message.reply('Sorry, I\'m unsure what you mean. Make sure not to add a space between \'!\' and your command.');
-					}
-					break;
-				case 'enroll':
-					//check if already enrolled
-					var exists = false;
-					UserModel.findOne({ discordId: message.author.id }, (err, foundUser) => {
-						if (foundUser) {
+		// check for user enrollment before anything else, and use this variable throughout the commands
+		UserModel.findOne({ discordId: message.author.id, }).then(user => {
+			// commands
+			if (message.content.substring(0, 1) == '!') {
+				var args = message.content.substring(1).split(/ +/);
+				var cmd = args[0]; 
+				args = args.splice(1);
+				switch(cmd) {
+					case '':
+						if (args.length != 0) {
+							message.reply('sorry, I\'m unsure what you mean. Make sure not to add a space between \'!\' and your command.');
+						}
+						break;
+					case 'enroll':
+						//check if already enrolled
+						if (user) {
 							message.reply('you\'ve already enrolled. If you want to edit your options, try `!user edit` instead');
 						} else {
 							const enroll = require('./messages/enroll.json');
@@ -166,49 +166,40 @@ bot.on('message', message => {
 								&& response.author.id === message.author.id;
 							};
 							message.reply(questionPersonality.question).then(() => {
-								message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
-									.then(collected => {
-										var pref = collected.first().content.toLowerCase();
-										message.reply(enroll[pref]);
-										new UserModel({ discordId: message.author.id, personalityPref: pref }).save();
-									})
-									.catch(() => {
-										message.reply('Nothing? Never mind then.');
-									});
+								message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+									var pref = collected.first().content.toLowerCase();
+									message.reply(enroll[pref]);
+									new UserModel({ discordId: message.author.id, personalityPref: pref }).save();
+								})
+								.catch(() => {
+									message.reply('Nothing? Never mind then.');
+								});
 							});	
 						}
-					});
-					break;
-				case 'user':
-					if (args.length == 0) {
-						UserModel.findOne({ discordId: message.author.id }, (err, foundUser) => {
-							if (foundUser) {
-								message.reply('here are your current user settings.\n```Name: ' + message.author.username + '\nPersonality Preference: ' + foundUser.personalityPref + '\nSessions: n/a```');
-	
-							} else {
-								message.reply('you aren\'t enrolled yet. Please do so by typing `!enroll`');
-							}
-						});
-					} else if (contains(args, 'edit')) {
-						const edit = require('./messages/user.json');
-						const questionEdit = edit.questionEdit;
-						const filter = response => {
-							return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-							&& response.author.id === message.author.id;
-						};
-						message.reply(questionEdit.question).then(() => {
-							message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
-								.then(collected => {
-									var editOption = collected.first().content.toLowerCase();
-									if (editOption === 'personality') {
-										const questionPersonality = edit.questionPersonality;
-										const filter = response => {
-											return questionPersonality.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-											&& response.author.id === message.author.id;
-										};
-										message.reply(questionPersonality.question).then(() => {
-											message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
-												.then(collected => {
+						break;
+					case 'user':
+						if (user) {
+							if (args.length == 0) {
+								message.reply('here are your current user settings.\n```Name: ' + message.author.username + '\nPersonality Preference: ' + user.personalityPref + '\nSessions: n/a```');
+		
+							} else if (contains(args, 'edit')) {
+								const edit = require('./messages/user.json');
+								const questionEdit = edit.questionEdit;
+								const filter = response => {
+									return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
+									&& response.author.id === message.author.id;
+								};
+								message.reply(questionEdit.question).then(() => {
+									message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+										var editOption = collected.first().content.toLowerCase();
+										if (editOption === '1' || editOption === 'personality') {
+											const questionPersonality = edit.questionPersonality;
+											const filter = response => {
+												return questionPersonality.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
+												&& response.author.id === message.author.id;
+											};
+											message.reply(questionPersonality.question).then(() => {
+												message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
 													var pref = collected.first().content.toLowerCase();
 													UserModel.findOneAndUpdate({ discordId: message.author.id }, { personalityPref: pref }, { new: true }, function(err, response) {
 														if (response) {
@@ -221,60 +212,214 @@ bot.on('message', message => {
 												.catch(() => {
 													message.reply('I won\'t change how I act around you then.');
 												});
-										});	
-									} else if (editOption === 'cancel') {
-										message.reply('No changes then, got it.');
+											});	
+										} else if (editOption === 'cancel') {
+											message.reply('no changes then, got it.');
+										}
+									});
+								});			
+							}
+						} else {
+							message.reply('you aren\'t enrolled yet. Please do so by typing `!enroll`');
+						}
+						break;
+					case 'campaign':
+						if (args.length == 0) {
+							message.reply('please specify a command.\n**list** - Gives a list of your on-going campaigns.\n**create** - Creates a new campaign.'); 
+						} else if (args[0] == 'list') {
+							//get all campaigns for given player
+						} else if (args[0] == 'add') {
+							if (args[1]) {
+								if (args[2]) {
+									// check that campaign exists
+									// check that the user is the leader player
+										// create player model for tagged user and campaign
+										// assign campaign role to tagged user	
+								} else {
+									message.reply('be sure to include tag the user you\'d like to add');
+								}
+							} else {
+								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+							}
+						} else if (args[0] == 'remove') {
+							if (args[1]) {
+								if (args[2]) {
+									// check that campaign exists
+									// check that the user is the leader player
+										// remove role from tagged user
+										// delete player model for tagged user and campaign
+								} else {
+									message.reply('be sure to include tag the user you\'d like to add');
+								}
+							} else {
+								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+							}
+						} else if (args[0] == 'leave') {
+							if (args[1]) {
+								// check that campaign exists
+									// remove role from user
+									// delete player model for user and campaign
+							} else {
+								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+							}				
+						} else if (args[0] == 'archive') {
+							if (args[1]) {
+								CampaignModel.findOne({ id: args[1] }).then( campaign => {
+									if (campaign) {
+										if (campaign.active){
+											PlayerModel.findOne({ userId: user._id, campaignId: campaign._id, leader: true}). then(player => {
+												if (player) {
+													const filter = response => { return response.author.id === message.author.id; };
+													message.reply('are you sure you would like to archive this campaign? (yes/no)').then(() => {
+														message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+															var choice = collected.first().content.toLowerCase();
+															if (choice == 'yes') {
+																var channel = message.guild.channels.cache.find(c => c.name == "campaign-" + args[1]);
+																let category = message.guild.channels.cache.find(c => c.name == "Old Campaigns" && c.type == "category");
+																if (category) channel.setParent(category.id);
+																// TODO: Do this for voice channels too
+																CampaignModel.findOneAndUpdate({ id: args[1] }, { active: false }, { new: true }, function(err, response) {
+																	if (response) {
+																		message.reply('Campaign #' + args[1] + ' has been archived.');
+																	} else if (err) {
+																		console.log(err)
+																	}
+																});
+															} else if (choice == 'no') {
+																message.reply('I won\'t archive that campaign then.');
+															}
+														}).catch(() => {
+															message.reply('I won\'t archive that campaign then.');
+														});
+													});	
+												} else {
+													message.reply('you do not have permission to archive this campaign.');
+												}
+											});
+										} else {
+											message.reply('this campaign is already archived.');
+										}
+									} else {
+										message.reply('no such campaign exists.');
+									}
+								});								
+							} else {
+								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+							}
+						} else if (args[0] == 'edit') {
+							if (args[1]) {
+								CampaignModel.findOne({ id: args[1] }).then( campaign => {
+									if (campaign) {
+										PlayerModel.findOne({ userId: user._id, campaignId: campaign._id }). then(player => {
+											if (player) {
+												var options = 'what would you like to do?\n`';
+												options += campaign.name ? '1. Update Campaign Name\n' : '1. Add Campaign Name\n';
+												options += campaign.description ? '2. Update Campaign Description\n' : '2. Add Campaign Description\n';
+												var index = 3;
+												if (campaign.voiceChannelId == null) {
+													options += index + '. Add Voice Channel\n';
+													index++;
+												}
+												if (player.leader) {
+													options += index + '. Transfer Leadership\n';
+													index++;
+												}
+												options += '<- Cancel`';
+
+
+												// const edit = require('./messages/user.json');
+												// const questionEdit = edit.questionEdit;
+												// const filter = response => {
+												// 	return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
+												// 	&& response.author.id === message.author.id;
+												// };
+
+												//TODO: I don't think we need to make this like the question thing before, but we should make these functions similar. This one is tough, so this is just the start of it.
+
+												message.reply(options).then(() => {
+													message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+														var editOption = collected.first().content.toLowerCase();
+														if (editOption === '1' || editOption === 'personality') {
+														} else if (editOption === '2' || editOption === 'personality') {
+														} else if (editOption === '3' || editOption === 'personality') {
+														} else if (editOption === '4' || editOption === 'personality') {
+															
+														} else if (editOption === 'cancel') {
+															message.reply('no changes then, got it.');
+														}
+													});
+												});
+
+												
+											} else {
+												message.reply('you do not have permission to archive this campaign.');
+											}
+										});
+
+									// check that the campaign exists
+									// check that the user is a player in campaign
+									// then show options to edit
+
+									// options are 
+										// add voice chat (if that option is null)
+											// if yes, create a voice channel and add the role for this campaign
+										// add/update nickname
+											// if yes, update DB model with new string
+										// add/update description
+											// if yes, update DB model with new string
+										// update leader player (if user is the leader)
+											// if yes, ask for the user to transfer to (just the @? UserId explicitly?)
+												// on response, change both player models to reflect switch
+
+									//otherwise, reply with "campaign does not exist" or "you do not have permission to edit this campaign"
+
+
+									} else {
+										message.reply('no such campaign exists.');
 									}
 								});
-						});			
-					}
-					break;
-				case 'campaign':
-					console.log(args);
-					if (args.length == 0) {
-						message.reply('please specify a command.\n**list** - Gives a list of your on-going campaigns.\n**create** - Creates a new campaign.'); 
-					} else if (args[0] == 'list') {
-						//get all sessions for given player
 
-					} else if (args[0] == 'create') {
-						InfoModel.findOne({ serverId: message.guild.id }, (err, info) => {
-							if (info) {
-								message.reply('let\'s create your campaign then- you\'ll be the leader unless you appoint someone else.\nYou may add features like voice channels, a campaign nickname, or a short desciption by using \'!campaign edit [campaign id]\'');
-								// create the new campaign
-								new CampaignModel({ 
-									id: info.campaignCount + 1, 
-									channelId: null,
-									voiceChannelId: null,
-									name: null,
-									description: null,
-									interventionPoints: 0, 
-									active: true 
-								}).save().then(campaign => {
-									// campaign created, create new campaign channel
-									message.guild.channels.create('campaign-' + campaign.id, { type: "text" }).then(channel => {
-										// channel created, add to Campaign category if available
-										let category = message.guild.channels.cache.find(c => c.name == "Campaigns" && c.type == "category");
-										if (category) channel.setParent(category.id);
-										// create new campaign role
-										message.guild.roles.create({
-											data: {
-												name: "campaign-" + campaign.id,
-												color: "GREYPLE",
-												mentionable: true
-											},
-											reason:"Campaign creation",
-										}).then((role) => {
-											// role created, add role to user and channel with correct permissions
-											message.member.roles.add(role);
-											channel.updateOverwrite(role, { SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true });
-										}).catch(console.error);
-										
-										// update campaign with channel
-										CampaignModel.findByIdAndUpdate(campaign._id, { channelId: channel.id }).then(() => {
-											// update server info campaign counter
-											InfoModel.findByIdAndUpdate(info._id, { campaignCount: info.campaignCount + 1 }).then(() => {});
-											// create player model with user and campaign models
-											UserModel.findOne({ discordId: message.author.id }).then(user => {
+							} else {
+								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+							}
+						} else if (args[0] == 'create') {
+							InfoModel.findOne({ serverId: message.guild.id }, (err, info) => {
+								if (info) {
+									message.reply('let\'s create your campaign then- you\'ll be the leader unless you appoint someone else.\nYou may add features like voice channels, a campaign nickname, or a short desciption by using \'!campaign edit [campaign id]\'');
+									// create the new campaign
+									new CampaignModel({ 
+										id: info.campaignCount + 1, 
+										channelId: null,
+										voiceChannelId: null,
+										name: null,
+										description: null,
+										interventionPoints: 0, 
+										active: true 
+									}).save().then(campaign => {
+										// campaign created, create new campaign channel
+										message.guild.channels.create('campaign-' + campaign.id, { type: "text" }).then(channel => {
+											// channel created, add to Campaign category if available
+											let category = message.guild.channels.cache.find(c => c.name == "Campaigns" && c.type == "category");
+											if (category) channel.setParent(category.id);
+											// create new campaign role
+											message.guild.roles.create({
+												data: {
+													name: "campaign-" + campaign.id,
+													color: "GREYPLE",
+													mentionable: true
+												},
+												reason:"Campaign creation",
+											}).then((role) => {
+												// role created, add role to user and channel with correct permissions
+												message.member.roles.add(role);
+												channel.updateOverwrite(role, { SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true });
+											}).catch(console.error);
+											
+											// update campaign with channel
+											CampaignModel.findByIdAndUpdate(campaign._id, { channelId: channel.id }).then(() => {
+												// update server info campaign counter
+												InfoModel.findByIdAndUpdate(info._id, { campaignCount: info.campaignCount + 1 }).then(() => {});
+												// create player model with user and campaign models
 												new PlayerModel({
 													userId: user._id,
 													campaignId: campaign._id,
@@ -283,177 +428,177 @@ bot.on('message', message => {
 													notes: null 
 												}).save()
 											});
-										});
-									}).catch(console.error);
-								});
-							} else {
-								message.reply('whoops, something isn\'t set right on my end, cannot create campaigns at this time.');
-							}
-						});
-					}
-					break;
-					//	message.reply('you\'re not in a session right now. Use \'!campaign list\' to see your available campaigns, and \'!session start [campaign id]\' to start a session for a campaign.');
-				case 'npc':
-					if (args.length == 0) {
-						message.reply('please specify what you\'d like to know about this NPC.\n**attitude** - Gives the demeanor of the NPC towards you.\n**build** - Creates a random NPC description to work with.'); 
-					}
-					// build
-					if (args[0] == 'build') {
-						var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
-						
-						var raceArray = npcBuild[0];
-						if (contains(args, 'uncommon') || contains(args, 'u')) {
-							raceArray = raceArray.concat(npcBuild[1]);
-						} if (contains(args, 'rare') || contains(args, 'r')) {
-							raceArray = raceArray.concat(npcBuild[2]);
-						} if (contains(args, 'monster') || contains(args, 'm')) {
-							raceArray = npcBuild[2];
+										}).catch(console.error);
+									});
+								} else {
+									message.reply('whoops, something isn\'t set right on my end, cannot create campaigns at this time.');
+								}
+							});
 						}
-						npc += "```\n Race: " + raceArray[rand(raceArray.length)-1];
+						break;
+						//	message.reply('you\'re not in a session right now. Use \'!campaign list\' to see your available campaigns, and \'!session start [campaign id]\' to start a session for a campaign.');
+					case 'npc':
+						if (args.length == 0) {
+							message.reply('please specify what you\'d like to know about this NPC.\n**attitude** - Gives the demeanor of the NPC towards you.\n**build** - Creates a random NPC description to work with.'); 
+						}
+						// build
+						if (args[0] == 'build') {
+							var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
+							
+							var raceArray = npcBuild[0];
+							if (contains(args, 'uncommon') || contains(args, 'u')) {
+								raceArray = raceArray.concat(npcBuild[1]);
+							} if (contains(args, 'rare') || contains(args, 'r')) {
+								raceArray = raceArray.concat(npcBuild[2]);
+							} if (contains(args, 'monster') || contains(args, 'm')) {
+								raceArray = npcBuild[2];
+							}
+							npc += "```\n Race: " + raceArray[rand(raceArray.length)-1];
 
-						if (contains(args, 'class') || contains(args, 'c')) {
-							npc += "\n Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
-						}  
-						//check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
-						npc += "\n Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
-							"\n Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-							"\n Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
-							"\n Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-							"\n Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
-							"\n Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
-							"\n Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
+							if (contains(args, 'class') || contains(args, 'c')) {
+								npc += "\n Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
+							}  
+							//check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
+							npc += "\n Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
+								"\n Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+								"\n Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
+								"\n Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+								"\n Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
+								"\n Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
+								"\n Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
 
-						npc = npc + '```';
-						// TODO: Make this a helper method instead, and take in multiple arguments without issue
-						message.reply(npc);
-					}
-					// attitude
-					if (args[0] == 'attitude') {
-						message.reply(npcAttitude[rand(3)-1]);
-					}
-					break;
-				case 'oracle':
-					// Make sure a SESSION is going for the player.
+							npc = npc + '```';
+							// TODO: Make this a helper method instead, and take in multiple arguments without issue
+							message.reply(npc);
+						}
+						// attitude
+						if (args[0] == 'attitude') {
+							message.reply(npcAttitude[rand(3)-1]);
+						}
+						break;
+					case 'oracle':
+						// Make sure a SESSION is going for the player.
 
 
-					const oracle = require('./messages/oracle.json');
-					
-					var ips = 0;
-					var roll = rand(6);
-					if (roll == 6) {
-						ips++;
-					}
-
-					// likeliness/unlikeliness
-					var advantage = args[0] === 'likely';
-					var disadvantage = args[0] === 'unlikely';
-					if (advantage || disadvantage) {
-						var roll2 = rand(6);
-						if (roll2 == 6) {
+						const oracle = require('./messages/oracle.json');
+						
+						var ips = 0;
+						var roll = rand(6);
+						if (roll == 6) {
 							ips++;
 						}
-						if (advantage) {
-							roll = Math.max(roll, roll2);
-						} else {
-							roll = Math.min(roll, roll2);
-						}
-					}
-					message.reply(oracle[roll]);
 
-					//TODO: Add IP to the Session IP counter
-					// handle intervention points after all rolls
-					// for (i = 0; i < ips; i++) {
-					// 	addInterventionPoint(channelId);
-					// }
-					break;
-				case 'portent':
-					var responses = [
-						"Use these words for inspiration", "Here, try these words", "Let these jog your imagination", "Look, I'm not a dictionary, but I know some helpful words"
-					];
-					var index1 = rand(3)-1;
-					var index2 = rand(3)-1;
-					var word1 = portents[index1][rand(portents[index1].length)-1];
-					var word2 = portents[index2][rand(portents[index2].length)-1];
-
-					message.reply(responses[rand(responses.length-1)] + ': "' + word1 + '" and "' + word2 + '"');
-					break;
-				case 'twene':
-					message.reply('Ah, so things are not as expected? ' + twene[rand(twene.length-1)]);
-					break;
-				case 'flip':
-					var coin = rand(2) == 2 ? "heads" : "tails";
-					message.reply('I flipped a coin for you, it was ' + coin + '.' );
-					break;
-				case 'kroll':
-					// set defaults
-					var numbers = [];
-					var total = 0;
-					var count = 1;
-					var sides = 20;
-					var symbol;
-					var bonus;
-					var critSuccess = false;
-					var critFail = false;
-					// set up dice
-					var dice = message.content.match(/(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/);
-					if (dice) {
-						count = dice[1] ? dice[1] : count;
-						sides = dice[2];
-						symbol = dice[4];
-						bonus = dice[5];
-					}
-					// handle d0 dice
-					if (sides == 0) {
-						message.reply('Look- it\'s fucking nothing!'); 
-						return;
-					}
-					// roll all dice
-					for (i = 0; i < count; i++) {
-						numbers[i] = rand(sides);
-						total += numbers[i];
-						// account for crits
-						critSuccess = critSuccess || numbers[i] == sides;
-						critFail = critFail || numbers[i] == 1;
-					}
-					// apply bonuses
-					if (symbol) {
-						if (symbol == "+") {
-							total += parseInt(bonus);
-						} else {
-							total -= parseInt(bonus);
+						// likeliness/unlikeliness
+						var advantage = args[0] === 'likely';
+						var disadvantage = args[0] === 'unlikely';
+						if (advantage || disadvantage) {
+							var roll2 = rand(6);
+							if (roll2 == 6) {
+								ips++;
+							}
+							if (advantage) {
+								roll = Math.max(roll, roll2);
+							} else {
+								roll = Math.min(roll, roll2);
+							}
 						}
-					}				
-					// calculate percentage of success
-					var max = sides * count;
-					var index = 2; // default, 26-74%
-					if (critSuccess && critFail) { // both crit success and crit fail
-						index = 7;
-					} else if (critSuccess && sides == 20) { // crit success
-						index = 6;
-					} else if (critFail && sides == 20) { // crit fail
-						index = 5;
-					} else if (total >= max * .90) { // 91-100%
-						index = 4;
-					} else if (total <= max * .10) { // 0-9%
-						index = 0;	
-					} else if (total >= max * .75) { // 75-90%
-						index = 3;
-					} else if (total <= max * .25) { // 10-25%	
-						index = 1;
-					}
-					message.reply(diceMessage(index, bonus, symbol, count, numbers, sides, total));
-					break;
-				case 'commands':
-					message.channel.send('I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~'); 
-					break; 
-				case 'intro':
-					message.channel.send('I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.'); 
-					break; 
-				case 'credits':
-					message.channel.send('Code by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]\nPortent Words from [https://wordcounter.net/random-word-generator]'); 
-					break; 
-			} 
-		} 
+						message.reply(oracle[roll]);
+
+						//TODO: Add IP to the Session IP counter
+						// handle intervention points after all rolls
+						// for (i = 0; i < ips; i++) {
+						// 	addInterventionPoint(channelId);
+						// }
+						break;
+					case 'portent':
+						var responses = [
+							"Use these words for inspiration", "Here, try these words", "Let these jog your imagination", "Look, I'm not a dictionary, but I know some helpful words"
+						];
+						var index1 = rand(3)-1;
+						var index2 = rand(3)-1;
+						var word1 = portents[index1][rand(portents[index1].length)-1];
+						var word2 = portents[index2][rand(portents[index2].length)-1];
+
+						message.reply(responses[rand(responses.length-1)] + ': "' + word1 + '" and "' + word2 + '"');
+						break;
+					case 'twene':
+						message.reply('Ah, so things are not as expected? ' + twene[rand(twene.length-1)]);
+						break;
+					case 'flip':
+						var coin = rand(2) == 2 ? "heads" : "tails";
+						message.reply('I flipped a coin for you, it was ' + coin + '.' );
+						break;
+					case 'kroll':
+						// set defaults
+						var numbers = [];
+						var total = 0;
+						var count = 1;
+						var sides = 20;
+						var symbol;
+						var bonus;
+						var critSuccess = false;
+						var critFail = false;
+						// set up dice
+						var dice = message.content.match(/(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/);
+						if (dice) {
+							count = dice[1] ? dice[1] : count;
+							sides = dice[2];
+							symbol = dice[4];
+							bonus = dice[5];
+						}
+						// handle d0 dice
+						if (sides == 0) {
+							message.reply('Look- it\'s fucking nothing!'); 
+							return;
+						}
+						// roll all dice
+						for (i = 0; i < count; i++) {
+							numbers[i] = rand(sides);
+							total += numbers[i];
+							// account for crits
+							critSuccess = critSuccess || numbers[i] == sides;
+							critFail = critFail || numbers[i] == 1;
+						}
+						// apply bonuses
+						if (symbol) {
+							if (symbol == "+") {
+								total += parseInt(bonus);
+							} else {
+								total -= parseInt(bonus);
+							}
+						}				
+						// calculate percentage of success
+						var max = sides * count;
+						var index = 2; // default, 26-74%
+						if (critSuccess && critFail) { // both crit success and crit fail
+							index = 7;
+						} else if (critSuccess && sides == 20) { // crit success
+							index = 6;
+						} else if (critFail && sides == 20) { // crit fail
+							index = 5;
+						} else if (total >= max * .90) { // 91-100%
+							index = 4;
+						} else if (total <= max * .10) { // 0-9%
+							index = 0;	
+						} else if (total >= max * .75) { // 75-90%
+							index = 3;
+						} else if (total <= max * .25) { // 10-25%	
+							index = 1;
+						}
+						message.reply(diceMessage(index, bonus, symbol, count, numbers, sides, total));
+						break;
+					case 'commands':
+						message.channel.send('I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~'); 
+						break; 
+					case 'intro':
+						message.channel.send('I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.'); 
+						break; 
+					case 'credits':
+						message.channel.send('Code by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]\nPortent Words from [https://wordcounter.net/random-word-generator]'); 
+						break; 
+				} 
+			}
+		})
 	}
 }); 
 

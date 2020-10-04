@@ -1,6 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const User = Schema({
+    username: String,
     discordId: String,
     personalityPref: String
 });

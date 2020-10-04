@@ -1,0 +1,112 @@
+{
+    "general": {
+        "noCommand": "sorry, I'm unsure what you mean. Make sure not to add a space between `!` and your command.",
+        "nothingNevermind": "Nothing? Never mind then.",
+        "translatePersonality": {
+            "1": "normal",
+            "2": "kind",
+            "3": "flirty",
+            "4": "mean"
+        }
+    },
+    "oracle": {
+        "1": "no, and...",
+        "2": "no.",
+        "3": "no, but...",
+        "4": "yes, but...",
+        "5": "yes.",
+        "6": "yes, and..."
+    },
+    "enroll": {
+        "enrolled": "you've already enrolled. If you want to edit your options, try `!user edit` instead",
+        "questionPersonality": {
+            "question": "you'd like to enroll? Alright, how would you like me to act towards you?\n`1. Normal\n2. Kind\n3. Flirty\n4. Mean`",
+            "answers": ["1", "2", "3", "4"],
+            "1": "that works for me. You've now been enrolled. Let me know when you'd like to create a campaign with `!campaign create`",
+            "2": "I see. Not to worry, I'll be mindful of my words. You're enrolled now, by the way. Let me know when you'd like to create a campaign with `!campaign create`",
+            "3": "aren't we daring? I can tell we'll have lots of fun~ I've got you covered, let me know when you'd like to create a campaign with `!campaign create`",
+            "4": "no need for the kid gloves then? HAH, good. I've got you down on my shit list now, let me know when you'd like to create a campaign with `!campaign create`"
+        }
+    },
+    "user": {
+        "questionEdit": {
+            "question": "what would you like to edit?\n`1. Personality\n <- Cancel`",
+            "answers": ["1", "personality", "cancel"]
+        },
+        "questionPersonality": {
+            "question": "how would you like me to act towards you?\n`1. Normal\n2. Kind\n3. Flirty\n4. Mean`",
+            "answers": ["1", "2", "3", "4"],
+            "1": "I can do that. I'll act normally then.",
+            "2": "not to worry, my small friend. I shall be kind to you.",
+            "3": "I thought you'd never ask~ Consider it done, cutie.",
+            "4": "if you insist! I'll pull no punches, my good bitch."
+        },
+        "notEnrolled": "you aren't enrolled yet. Please do so by typing `!enroll`",
+        "cancel": "I won't change how I act around you then."     
+    },
+    "campaign": {
+        "noCommand": "please specify a command.\n**list** - Gives a list of your on-going campaigns.\n**create** - Creates a new campaign.",
+        "noId": "be sure to include the id for your campaign (Example: #campaign-1's id would be 1)",
+        "noExist": "no such campaign exists.",
+        "noArchive": "this campaign is already archived.",
+        "noPermission": "you do not have permission to archive this campaign.",
+        "cancelArchive": "I won't archive that campaign then",
+        "add": {
+            "noTag": "be sure to include the tag of the user you'd like to add, after the campaign's id."
+        },
+        "remove": {
+            "noTag": "be sure to include the tag of the user you'd like to remove, after the campaign's id."
+        },
+        "questionArchive": "are you sure you would like to archive this campaign? (yes/no)",
+        "archiveConfirm": "yes",
+        "archiveCancel": "no" ,
+        "questionLeave": "are you sure you would like to archive this campaign? (yes/no)",
+        "leaveConfirm": "yes",
+        "leaveCancel": "no" ,
+        "cancelLeave": "I won't remove you then.",
+        "leaveSuccess": "you've successfully left Campaign #",
+        "channelPrefix": "campaign-",
+        "voicePrefix": "vc-campaign-",
+        "archiveCategory": "Old Campaigns",
+        "archiveSuccess": "successfully archived Campaign #"
+    }, 
+    "diceRoller": {
+        "normal": [
+            ["Oh fuck, that's a ", "_Eeeesh_, it's a "],
+            ["Good luck with a ", "Oh well, can't do much with a ", "Oof, that's a "],	
+            ["You get a ", "It's a ", "I bestow you a "],
+            ["Not bad, you got a ", "Oh wow, that's a ", "Nice, it's a "],
+            ["_Yoooo_, it's a ", "Oh damn, you got a "],
+            ["Critical fail, you rolled a natural 1 there buddy. Your total is "],
+            ["Critical Success! You rolled a natural 20! Your total is "],
+	        ["Incredible, a natural 20 _and_ natural 1? Hope you were rolling with advantage, buddy! Your total is "]
+        ],
+        "kind": [],
+        "flirty": [],
+        "mean": []
+    }, 
+    "twene": [
+        "Let's **increase a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
+        "Let's **decrease a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
+        "Let's **add a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element now exists in the scene that you weren’t previously aware of.", 
+        "Let's **remove a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element that should normally exist in the scene does not exist here.", 
+        "Let's **increase a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
+        "Let's **decrease a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
+        "Let's **add a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element now exists in the scene that you weren’t previously aware of.", 
+        "Let's **remove a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element that should normally exist in the scene does not exist here.", 
+        "Let's try a **wild positive!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is positive, but because it can be a little obscure, you can use `!portent` to help decide what happens next.", 
+        "Let's try a **wild negative!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is negative, but because it can be a little obscure, you can use `!portent` to help decide what happens next"],
+    "npcAttitude": ["They are hostile towards you.", "They are neutral towards you.", "They are friendly towards you."], 
+    "npcBuild": [
+        ["human", "elf", "dwarf", "half-elf", "gnome", "halfling", "drow"],
+        ["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg", "centaur", "satyr", "pixie", "sprite", " goliath"],
+        ["goblin", "hobgoblin", "bugbear", "kobold", "yuan-ti"],
+        ["wizard", "fighter", "sorcerer", "warlock", "paladin", "cleric", "barbarian", "bard", "artificer", "ranger", "druid", "monk", "rogue"],
+        ["male", "female", "nonbinary"],
+        ["black", "white", "brown", "orange", "red", "pink", "blue", "purple", "green", "yellow"],
+        ["short hair", "long hair", "medium hair"],
+        ["short", "tall", "average"],
+        ["heavy", "thin", "average"],
+        ["freckles", "scar", "beauty mark", "missing eye/limb", "facial hair", "glasses"]
+    ]
+}

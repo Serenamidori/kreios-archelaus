@@ -9,17 +9,32 @@ var mongoose = require('mongoose');
 const Campaign = require('./models/Campaign');
 var bot = new Discord.Client();
 
+mongoose.connect('mongodb+srv://serenamidori:vs46aqp6@cluster0.6hnfq.mongodb.net/kreios-archelaus?retryWrites=true&w=majority', {
+	useNewUrlParser: true,
+	useFindAndModify: false,
+	useCreateIndex: true,
+	useUnifiedTopology: true
+	}, function (err) {
+	if (err) throw err;
+	console.log('Successfully connected to DB');
+	bot.login(process.env.TOKEN);
+});
+
+bot.on('ready', () => {
+	console.info(`Logged in as ${bot.user.tag}`);
+});
+
 // String Arrays
-var responses = [
-	["Oh fuck, that's a ", "_Eeeesh_, it's a "], // 0-9%
-	["Good luck with a ", "Oh well, can't do much with a ", "Oof, that's a "], // 10-25%	
-	["You get a ", "It's a ", "I bestow you a "], // 26-74%
-	["Not bad, you got a ", "Oh wow, that's a ", "Nice, it's a "], // 75-90%
-	["_Yoooo_, it's a ", "Oh damn, you got a "], // 91-100%
-	["Critical fail, you rolled a natural 1 there buddy. Your total is "], // crit fail
-	["Critical Success! You rolled a natural 20! Your total is "], // crit success
-	["Incredible, a natural 20 _and_ natural 1? Hope you were rolling with advantage, buddy! Your total is "], // both crits
-];
+// var responses = [
+// 	["Oh fuck, that's a ", "_Eeeesh_, it's a "], // 0-9%
+// 	["Good luck with a ", "Oh well, can't do much with a ", "Oof, that's a "], // 10-25%	
+// 	["You get a ", "It's a ", "I bestow you a "], // 26-74%
+// 	["Not bad, you got a ", "Oh wow, that's a ", "Nice, it's a "], // 75-90%
+// 	["_Yoooo_, it's a ", "Oh damn, you got a "], // 91-100%
+// 	["Critical fail, you rolled a natural 1 there buddy. Your total is "], // crit fail
+// 	["Critical Success! You rolled a natural 20! Your total is "], // crit success
+// 	["Incredible, a natural 20 _and_ natural 1? Hope you were rolling with advantage, buddy! Your total is "], // both crits
+// ];
 
 // Intervention table
 var interventions = [
@@ -32,38 +47,38 @@ var interventions = [
 ];
 
 // TWENE table
-var twene = [
-	"Let's **increase a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
-	"Let's **decrease a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
-	"Let's **add a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element now exists in the scene that you weren’t previously aware of.", 
-	"Let's **remove a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element that should normally exist in the scene does not exist here.", 
-	"Let's **increase a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
-	"Let's **decrease a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
-	"Let's **add a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element now exists in the scene that you weren’t previously aware of.", 
-	"Let's **remove a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element that should normally exist in the scene does not exist here.", 
-	"Let's try a **wild positive!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is positive, but because it can be a little obscure, you can use `!portent` to help decide what happens next.", 
-	"Let's try a **wild negative!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is negative, but because it can be a little obscure, you can use `!portent` to help decide what happens next"];
+// var twene = [
+// 	"Let's **increase a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
+// 	"Let's **decrease a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
+// 	"Let's **add a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element now exists in the scene that you weren’t previously aware of.", 
+// 	"Let's **remove a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element that should normally exist in the scene does not exist here.", 
+// 	"Let's **increase a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
+// 	"Let's **decrease a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
+// 	"Let's **add a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element now exists in the scene that you weren’t previously aware of.", 
+// 	"Let's **remove a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element that should normally exist in the scene does not exist here.", 
+// 	"Let's try a **wild positive!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is positive, but because it can be a little obscure, you can use `!portent` to help decide what happens next.", 
+// 	"Let's try a **wild negative!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is negative, but because it can be a little obscure, you can use `!portent` to help decide what happens next"];
 
 // NPC Attitude table
-var npcAttitude = ["They are hostile towards you.", "They are neutral towards you.", "They are friendly towards you."];
+// var npcAttitude = ["They are hostile towards you.", "They are neutral towards you.", "They are friendly towards you."];
 
 // NPC Build table
 // [0] Races (common), [1] Races (uncommon), [2] Races (monster), [3] Classes, [4] Genders, [5] Color, [6] Hair length, [7] Height, [8] Weight, [9] Misc.
-var npcBuild = [
-	["human", "elf", "dwarf", "half-elf", "gnome", "halfling", "drow"],
-	["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg", "centaur", "satyr", "pixie", "sprite", " goliath"],
-	["goblin", "hobgoblin", "bugbear", "kobold", "yuan-ti"],
-	["wizard", "fighter", "sorcerer", "warlock", "paladin", "cleric", "barbarian", "bard", "artificer", "ranger", "druid", "monk", "rogue"],
-	["male", "female", "nonbinary"],
-	["black", "white", "brown", "orange", "red", "pink", "blue", "purple", "green", "yellow"],
-	["short hair", "long hair", "medium hair"],
-	["short", "tall", "average"],
-	["heavy", "thin", "average"],
-	["freckles", "scar", "beauty mark", "missing eye/limb", "facial hair", "glasses"]
-];
+// var npcBuild = [
+// 	["human", "elf", "dwarf", "half-elf", "gnome", "halfling", "drow"],
+// 	["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg", "centaur", "satyr", "pixie", "sprite", " goliath"],
+// 	["goblin", "hobgoblin", "bugbear", "kobold", "yuan-ti"],
+// 	["wizard", "fighter", "sorcerer", "warlock", "paladin", "cleric", "barbarian", "bard", "artificer", "ranger", "druid", "monk", "rogue"],
+// 	["male", "female", "nonbinary"],
+// 	["black", "white", "brown", "orange", "red", "pink", "blue", "purple", "green", "yellow"],
+// 	["short hair", "long hair", "medium hair"],
+// 	["short", "tall", "average"],
+// 	["heavy", "thin", "average"],
+// 	["freckles", "scar", "beauty mark", "missing eye/limb", "facial hair", "glasses"]
+// ];
 
 // Intervention point tracker
-var interventionPoints = 0;
+// var interventionPoints = 0;
 
 // Generates a random number, default 1-20
 function rand (sides) {
@@ -93,11 +108,6 @@ function diceMessage (index, bonus, symbol, count, numbers, sides, total) {
 	return response[rand(response.length)-1] + total + punctuation + "\n" + diceMessage;
 }
 
-// Formats a message to @ the user who sent the command
-function atUser (userId) {
-	return '<@' + userId + '> ';
-}
-
 // Checks if a string appears in an array
 function contains (array, string) {
 	for (i = 0; i < array.length; i++) {
@@ -120,26 +130,12 @@ function addInterventionPoint (channelId) {
 	}
 }
 
-function containsWord(string, word) {
-	return string.match(new RegExp("\\b" + word + "\\b")) != null;
-}
-
-
-bot.on('ready', () => {
-	console.info(`Logged in as ${bot.user.tag}!`);
-});
-
-
 bot.on('message', message => { 
 	// Prevents Kreios from responding to his own messages
 	if (message.author.id == bot.user.id) return;
 
-	if (message.content == 'ping') {
-		message.reply('pong');
-	}
-
 	if (message.channel.id == process.env.BOT_CHANNEL || message.channel.id == process.env.TESTING_CHANNEL) {
-		//const constants = require('./messages/constants.json');
+		const constants = require('./messages/constants.json');
 
 		// check for user enrollment before anything else, and use this variable throughout the commands
 		UserModel.findOne({ discordId: message.author.id, }).then(user => {
@@ -151,16 +147,14 @@ bot.on('message', message => {
 				switch(cmd) {
 					case '':
 						if (args.length != 0) {
-							message.reply('sorry, I\'m unsure what you mean. Make sure not to add a space between \'!\' and your command.');
+							message.reply(constants.general.noCommand);
 						}
 						break;
 					case 'enroll':
-						//check if already enrolled
 						if (user) {
-							message.reply('you\'ve already enrolled. If you want to edit your options, try `!user edit` instead');
+							message.reply(constants.enroll.enrolled);
 						} else {
-							const enroll = require('./messages/enroll.json');
-							const questionPersonality = enroll.questionPersonality;
+							const questionPersonality = constants.enroll.questionPersonality;
 							const filter = response => {
 								return questionPersonality.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
 								&& response.author.id === message.author.id;
@@ -168,78 +162,130 @@ bot.on('message', message => {
 							message.reply(questionPersonality.question).then(() => {
 								message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
 									var pref = collected.first().content.toLowerCase();
-									message.reply(enroll[pref]);
-									new UserModel({ discordId: message.author.id, personalityPref: pref }).save();
+									message.reply(questionPersonality[pref]);
+									new UserModel({ 
+										username: message.author.username, 
+										discordId: message.author.id, 
+										personalityPref: constants.general.translatePersonality[pref] 
+									}).save();
 								})
 								.catch(() => {
-									message.reply('Nothing? Never mind then.');
+									message.reply(constants.general.nothingNevermind);
 								});
 							});	
 						}
 						break;
 					case 'user':
-						if (user) {
-							if (args.length == 0) {
-								message.reply('here are your current user settings.\n```Name: ' + message.author.username + '\nPersonality Preference: ' + user.personalityPref + '\nSessions: n/a```');
-		
-							} else if (contains(args, 'edit')) {
-								const edit = require('./messages/user.json');
-								const questionEdit = edit.questionEdit;
-								const filter = response => {
-									return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-									&& response.author.id === message.author.id;
-								};
-								message.reply(questionEdit.question).then(() => {
-									message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-										var editOption = collected.first().content.toLowerCase();
-										if (editOption === '1' || editOption === 'personality') {
-											const questionPersonality = edit.questionPersonality;
-											const filter = response => {
-												return questionPersonality.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-												&& response.author.id === message.author.id;
-											};
-											message.reply(questionPersonality.question).then(() => {
-												message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-													var pref = collected.first().content.toLowerCase();
-													UserModel.findOneAndUpdate({ discordId: message.author.id }, { personalityPref: pref }, { new: true }, function(err, response) {
-														if (response) {
-															message.reply(edit[pref]);
-														} else if (err) {
-															console.log(err)
-														}
-													});
-												})
-												.catch(() => {
-													message.reply('I won\'t change how I act around you then.');
-												});
-											});	
-										} else if (editOption === 'cancel') {
-											message.reply('no changes then, got it.');
-										}
-									});
-								});			
-							}
-						} else {
+						if (!user) {
 							message.reply('you aren\'t enrolled yet. Please do so by typing `!enroll`');
+							return;
+						}
+						if (args.length == 0) {
+							message.reply('here are your current user settings.\n```Name: ' + message.author.username + '\nPersonality Preference: ' + user.personalityPref + '```');
+						} else if (args[0] == 'edit') {
+							const questionEdit = constants.user.questionEdit;
+							const filter = response => {
+								return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
+								&& response.author.id === message.author.id;
+							};
+							message.reply(questionEdit.question).then(() => {
+								message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+									var userEditOption = collected.first().content.toLowerCase();
+									if (userEditOption == '1') { // personality
+										const questionPersonality = constants.user.questionPersonality;
+										const filter = response => {
+											return questionPersonality.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
+											&& response.author.id === message.author.id;
+										};
+										message.reply(questionPersonality.question).then(() => {
+											message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+												var pref = collected.first().content.toLowerCase();
+												UserModel.findOneAndUpdate({ discordId: message.author.id }, { 
+													personalityPref: constants.general.translatePersonality[pref] 
+												}, { new: true }, function(err, response) {
+													if (response) {
+														message.reply(questionPersonality[pref]);
+													} else if (err) {
+														console.log(err)
+													}
+												});
+											})
+											.catch(() => {
+												message.reply(constants.enroll.cancel);
+											});
+										});	
+									} else if (userEditOption === 'cancel') {
+										message.reply(constants.enroll.cancel);
+									}
+								});
+							});			
 						}
 						break;
 					case 'campaign':
+						if (!user) {
+							message.reply('you aren\'t enrolled yet. Please do so by typing `!enroll`');
+							return;
+						}
 						if (args.length == 0) {
-							message.reply('please specify a command.\n**list** - Gives a list of your on-going campaigns.\n**create** - Creates a new campaign.'); 
+							message.reply(constants.campaign.noCommand); 
 						} else if (args[0] == 'list') {
-							//get all campaigns for given player
+							var list = "";
+							PlayerModel.find({ userId: user._id }).then( players => {
+								var ids = [];
+								players.forEach( player => {
+									ids.push(player.campaignId);
+								});
+								CampaignModel.find({ _id: { $in: ids }}).then(campaigns => {
+									campaigns.forEach( campaign => {
+										list += "Campaign #" + campaign.id;
+										if (campaign.name) list += " (" + campaign.name + ")";
+										list += campaign.active ? " [Ongoing]\n" : "[Archived]\n";
+									});
+								}).then(() => {
+									message.reply('here are your campaigns.\n```' + list + '```');
+								})
+							});
 						} else if (args[0] == 'add') {
 							if (args[1]) {
 								if (args[2]) {
-									// check that campaign exists
-									// check that the user is the leader player
-										// create player model for tagged user and campaign
-										// assign campaign role to tagged user	
+									CampaignModel.findOne({ id: args[1] }).then( campaign => {
+										if (campaign) {
+											PlayerModel.findOne({ userId: user._id, campaignId: campaign._id, leader: true }).then( player => {
+												if (player) {
+													var newPlayerId = args[2].substring(2, args[2].length-1);
+													UserModel.findOne({ discordId: newPlayerId }).then( newUser => {
+														if (newUser) {
+															new PlayerModel({
+																username: newUser.username,
+																userId: newUser._id,
+																campaignId: campaign._id,
+																leader: false,
+																characters: null,
+																notes: null 
+															}).save();
+															const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
+															const member = message.mentions.members.first();
+															member.roles.add(role);
+															message.reply("successfully added <@" + newUser.discordId + "> to Campaign #" + campaign.id);
+														} else {
+															message.reply("this user has not enrolled yet. Please ask them to type `!enroll` to do so before joining a campaign.");
+														}
+													});
+												} else {
+													message.reply("you do not have permission to add this user.");
+												}
+											});
+										} else {
+											message.reply(constants.campaign.noExist);
+										}
+									}).catch(() => {
+										message.reply("sorry, not sure what that means. Make sure your arguments are correct.");
+									});
 								} else {
-									message.reply('be sure to include tag the user you\'d like to add');
+									message.reply(constants.campaign.add.noTag);
 								}
 							} else {
-								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+								message.reply(constants.campaign.noId);
 							}
 						} else if (args[0] == 'remove') {
 							if (args[1]) {
@@ -249,62 +295,102 @@ bot.on('message', message => {
 										// remove role from tagged user
 										// delete player model for tagged user and campaign
 								} else {
-									message.reply('be sure to include tag the user you\'d like to add');
+									message.reply(constants.campaign.remove.noTag);
 								}
 							} else {
-								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+								message.reply(constants.campaign.noId);
 							}
 						} else if (args[0] == 'leave') {
 							if (args[1]) {
-								// check that campaign exists
-									// remove role from user
-									// delete player model for user and campaign
+								CampaignModel.findOne({ id: args[1] }).then( campaign => {
+									if (campaign) {
+										PlayerModel.findOne({ userId: user._id, campaignId: campaign._id }).then( player => {
+											if (player) {
+												if (!player.leader) {
+													const filter = response => { return response.author.id === message.author.id; };
+													message.reply(constants.campaign.questionLeave).then(() => {
+														message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+															var choice = collected.first().content.toLowerCase();
+															if (choice == constants.campaign.leaveConfirm) {
+																const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
+																role.members.forEach(member => {
+																	if (message.member == member) {
+																		member.roles.remove(role); 
+																	}
+																});
+																PlayerModel.findOneAndDelete({ userId: user._id, campaignId: campaign._id }).then(deleted => {
+																	if (deleted) {
+																		message.reply("you've been successfully removed from Campaign #" + campaign.id);
+																	} else {
+																		message.reply("sorry, something went wrong. Try again later.");
+																	}
+																})
+															} else if (choice == constants.campaign.leaveCancel) {
+																message.reply(constants.campaign.cancelLeave);
+															}
+														}).catch(() => {
+															message.reply(constants.campaign.cancelLeave);
+														});
+													});
+												} else {
+													message.reply("you cannot leave this campaign if you're the leader. Try transferring leadership first, or archiving this campaign instead.");
+												}											
+											} else {
+												message.reply("you are not in this campaign.");
+											}
+										});
+									} else {
+										message.reply(constants.campaign.noExist);
+									}
+								});
 							} else {
-								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+								message.reply(constants.campaign.noId);
 							}				
 						} else if (args[0] == 'archive') {
 							if (args[1]) {
 								CampaignModel.findOne({ id: args[1] }).then( campaign => {
 									if (campaign) {
-										if (campaign.active){
-											PlayerModel.findOne({ userId: user._id, campaignId: campaign._id, leader: true}). then(player => {
-												if (player) {
-													const filter = response => { return response.author.id === message.author.id; };
-													message.reply('are you sure you would like to archive this campaign? (yes/no)').then(() => {
-														message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-															var choice = collected.first().content.toLowerCase();
-															if (choice == 'yes') {
-																var channel = message.guild.channels.cache.find(c => c.name == "campaign-" + args[1]);
-																let category = message.guild.channels.cache.find(c => c.name == "Old Campaigns" && c.type == "category");
-																if (category) channel.setParent(category.id);
-																// TODO: Do this for voice channels too
-																CampaignModel.findOneAndUpdate({ id: args[1] }, { active: false }, { new: true }, function(err, response) {
-																	if (response) {
-																		message.reply('Campaign #' + args[1] + ' has been archived.');
-																	} else if (err) {
-																		console.log(err)
-																	}
-																});
-															} else if (choice == 'no') {
-																message.reply('I won\'t archive that campaign then.');
-															}
-														}).catch(() => {
-															message.reply('I won\'t archive that campaign then.');
-														});
-													});	
-												} else {
-													message.reply('you do not have permission to archive this campaign.');
-												}
-											});
-										} else {
-											message.reply('this campaign is already archived.');
+										if (!campaign.active){
+											message.reply(constants.campaign.noArchive);
+											return;
 										}
+										PlayerModel.findOne({ userId: user._id, campaignId: campaign._id, leader: true }).then( player => {
+											if (player) {
+												const filter = response => { return response.author.id === message.author.id; };
+												message.reply(constants.campaign.questionArchive).then(() => {
+													message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+														var choice = collected.first().content.toLowerCase();
+														if (choice == constants.campaign.archiveConfirm) {
+															var channel = message.guild.channels.cache.find(c => c.name == constants.campaign.channelPrefix + args[1]);
+															let category = message.guild.channels.cache.find(c => c.name == constants.campaign.archiveCategory && c.type == "category");
+															if (category) channel.setParent(category.id);
+															// TODO: Do this for voice channels too
+															var voice = message.guild.channels.cache.find(c => c.name == constants.campaign.voicePrefix + args[1]);
+															if (voice) voice.delete();
+															CampaignModel.findOneAndUpdate({ id: args[1] }, { active: false }, { new: true }, function(err, response) {
+																if (response) {
+																	message.reply(constants.campaign.archiveSuccess + args[1]);
+																} else if (err) {
+																	console.log(err)
+																}
+															});
+														} else if (choice == constants.campaign.archiveCancel) {
+															message.reply(constants.campaign.cancelArchive);
+														}
+													}).catch(() => {
+														message.reply(constants.campaign.cancelArchive);
+													});
+												});	
+											} else {
+												message.reply(constants.campaign.noPermission);
+											}
+										});
 									} else {
-										message.reply('no such campaign exists.');
+										message.reply(constants.campaign.noExist);
 									}
 								});								
 							} else {
-								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
+								message.reply(constants.campaign.noId);
 							}
 						} else if (args[0] == 'edit') {
 							if (args[1]) {
@@ -327,24 +413,24 @@ bot.on('message', message => {
 												options += '<- Cancel`';
 
 
-												// const edit = require('./messages/user.json');
-												// const questionEdit = edit.questionEdit;
-												// const filter = response => {
-												// 	return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-												// 	&& response.author.id === message.author.id;
-												// };
+												const user = constants.user;
+												const questionEdit = user.questionEdit;
+												const filter = response => {
+													return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
+													&& response.author.id === message.author.id;
+												};
 
 												//TODO: I don't think we need to make this like the question thing before, but we should make these functions similar. This one is tough, so this is just the start of it.
 
 												message.reply(options).then(() => {
 													message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-														var editOption = collected.first().content.toLowerCase();
-														if (editOption === '1' || editOption === 'personality') {
-														} else if (editOption === '2' || editOption === 'personality') {
-														} else if (editOption === '3' || editOption === 'personality') {
-														} else if (editOption === '4' || editOption === 'personality') {
+														var userEditOption = collected.first().content.toLowerCase();
+														if (userEditOption === '1' || userEditOption === 'personality') {
+														} else if (userEditOption === '2' || userEditOption === 'personality') {
+														} else if (userEditOption === '3' || userEditOption === 'personality') {
+														} else if (userEditOption === '4' || userEditOption === 'personality') {
 															
-														} else if (editOption === 'cancel') {
+														} else if (userEditOption === 'cancel') {
 															message.reply('no changes then, got it.');
 														}
 													});
@@ -421,12 +507,13 @@ bot.on('message', message => {
 												InfoModel.findByIdAndUpdate(info._id, { campaignCount: info.campaignCount + 1 }).then(() => {});
 												// create player model with user and campaign models
 												new PlayerModel({
+													username: user.username,
 													userId: user._id,
 													campaignId: campaign._id,
 													leader: true,
 													characters: null,
 													notes: null 
-												}).save()
+												}).save();
 											});
 										}).catch(console.error);
 									});
@@ -443,6 +530,7 @@ bot.on('message', message => {
 						}
 						// build
 						if (args[0] == 'build') {
+							const npcBuild = constants.npcBuild;
 							var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
 							
 							var raceArray = npcBuild[0];
@@ -480,7 +568,7 @@ bot.on('message', message => {
 						// Make sure a SESSION is going for the player.
 
 
-						const oracle = require('./messages/oracle.json');
+						const oracle = constants.oracle;
 						
 						var ips = 0;
 						var roll = rand(6);
@@ -601,16 +689,6 @@ bot.on('message', message => {
 		})
 	}
 }); 
-
-mongoose.connect('mongodb+srv://serenamidori:vs46aqp6@cluster0.6hnfq.mongodb.net/kreios-archelaus?retryWrites=true&w=majority', {
-	useNewUrlParser: true,
-	useFindAndModify: false
-	}, function (err) {
-	if (err) throw err;
-	console.log('Successfully connected to DB');
-	bot.login(process.env.TOKEN);
-});
-
 
 // Portent word arrays (https://wordcounter.net/random-word-generator)
 // verbs [0], nouns [1], adjectives [2]

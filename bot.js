@@ -4,9 +4,7 @@ var UserModel = require('./models/User');
 var CampaignModel = require('./models/Campaign');
 var InfoModel = require('./models/Info');
 var PlayerModel = require('./models/Player');
-var SessionModel = require('./models/Session');
 var mongoose = require('mongoose');
-const Campaign = require('./models/Campaign');
 var bot = new Discord.Client();
 
 mongoose.connect('mongodb+srv://serenamidori:vs46aqp6@cluster0.6hnfq.mongodb.net/kreios-archelaus?retryWrites=true&w=majority', {
@@ -118,6 +116,11 @@ function contains (array, string) {
 	return false;
 }
 
+// Checks for a null or emptry string
+function isEmpty(string){
+	return (string == null || string.length === 0);
+}	
+
 // Adds an intervention point to the score and handles when we reach 3
 function addInterventionPoint (channelId) {
 	interventionPoints++;
@@ -223,255 +226,14 @@ bot.on('message', message => {
 						break;
 					case 'campaign':
 						if (!user) {
-							message.reply('you aren\'t enrolled yet. Please do so by typing `!enroll`');
+							message.reply(constants.user.notEnrolled);
 							return;
 						}
 						if (args.length == 0) {
 							message.reply(constants.campaign.noCommand); 
-						} else if (args[0] == 'list') {
-							var list = "";
-							PlayerModel.find({ userId: user._id }).then( players => {
-								var ids = [];
-								players.forEach( player => {
-									ids.push(player.campaignId);
-								});
-								CampaignModel.find({ _id: { $in: ids }}).then(campaigns => {
-									campaigns.forEach( campaign => {
-										list += "Campaign #" + campaign.id;
-										if (campaign.name) list += " (" + campaign.name + ")";
-										list += campaign.active ? " [Ongoing]\n" : "[Archived]\n";
-									});
-								}).then(() => {
-									message.reply('here are your campaigns.\n```' + list + '```');
-								})
-							});
-						} else if (args[0] == 'add') {
-							if (args[1]) {
-								if (args[2]) {
-									CampaignModel.findOne({ id: args[1] }).then( campaign => {
-										if (campaign) {
-											PlayerModel.findOne({ userId: user._id, campaignId: campaign._id, leader: true }).then( player => {
-												if (player) {
-													var newPlayerId = args[2].substring(2, args[2].length-1);
-													UserModel.findOne({ discordId: newPlayerId }).then( newUser => {
-														if (newUser) {
-															new PlayerModel({
-																username: newUser.username,
-																userId: newUser._id,
-																campaignId: campaign._id,
-																leader: false,
-																characters: null,
-																notes: null 
-															}).save();
-															const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
-															const member = message.mentions.members.first();
-															member.roles.add(role);
-															message.reply("successfully added <@" + newUser.discordId + "> to Campaign #" + campaign.id);
-														} else {
-															message.reply("this user has not enrolled yet. Please ask them to type `!enroll` to do so before joining a campaign.");
-														}
-													});
-												} else {
-													message.reply("you do not have permission to add this user.");
-												}
-											});
-										} else {
-											message.reply(constants.campaign.noExist);
-										}
-									}).catch(() => {
-										message.reply("sorry, not sure what that means. Make sure your arguments are correct.");
-									});
-								} else {
-									message.reply(constants.campaign.add.noTag);
-								}
-							} else {
-								message.reply(constants.campaign.noId);
-							}
-						} else if (args[0] == 'remove') {
-							if (args[1]) {
-								if (args[2]) {
-									// check that campaign exists
-									// check that the user is the leader player
-										// remove role from tagged user
-										// delete player model for tagged user and campaign
-								} else {
-									message.reply(constants.campaign.remove.noTag);
-								}
-							} else {
-								message.reply(constants.campaign.noId);
-							}
-						} else if (args[0] == 'leave') {
-							if (args[1]) {
-								CampaignModel.findOne({ id: args[1] }).then( campaign => {
-									if (campaign) {
-										PlayerModel.findOne({ userId: user._id, campaignId: campaign._id }).then( player => {
-											if (player) {
-												if (!player.leader) {
-													const filter = response => { return response.author.id === message.author.id; };
-													message.reply(constants.campaign.questionLeave).then(() => {
-														message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-															var choice = collected.first().content.toLowerCase();
-															if (choice == constants.campaign.leaveConfirm) {
-																const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
-																role.members.forEach(member => {
-																	if (message.member == member) {
-																		member.roles.remove(role); 
-																	}
-																});
-																PlayerModel.findOneAndDelete({ userId: user._id, campaignId: campaign._id }).then(deleted => {
-																	if (deleted) {
-																		message.reply("you've been successfully removed from Campaign #" + campaign.id);
-																	} else {
-																		message.reply("sorry, something went wrong. Try again later.");
-																	}
-																})
-															} else if (choice == constants.campaign.leaveCancel) {
-																message.reply(constants.campaign.cancelLeave);
-															}
-														}).catch(() => {
-															message.reply(constants.campaign.cancelLeave);
-														});
-													});
-												} else {
-													message.reply("you cannot leave this campaign if you're the leader. Try transferring leadership first, or archiving this campaign instead.");
-												}											
-											} else {
-												message.reply("you are not in this campaign.");
-											}
-										});
-									} else {
-										message.reply(constants.campaign.noExist);
-									}
-								});
-							} else {
-								message.reply(constants.campaign.noId);
-							}				
-						} else if (args[0] == 'archive') {
-							if (args[1]) {
-								CampaignModel.findOne({ id: args[1] }).then( campaign => {
-									if (campaign) {
-										if (!campaign.active){
-											message.reply(constants.campaign.noArchive);
-											return;
-										}
-										PlayerModel.findOne({ userId: user._id, campaignId: campaign._id, leader: true }).then( player => {
-											if (player) {
-												const filter = response => { return response.author.id === message.author.id; };
-												message.reply(constants.campaign.questionArchive).then(() => {
-													message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-														var choice = collected.first().content.toLowerCase();
-														if (choice == constants.campaign.archiveConfirm) {
-															var channel = message.guild.channels.cache.find(c => c.name == constants.campaign.channelPrefix + args[1]);
-															let category = message.guild.channels.cache.find(c => c.name == constants.campaign.archiveCategory && c.type == "category");
-															if (category) channel.setParent(category.id);
-															// TODO: Do this for voice channels too
-															var voice = message.guild.channels.cache.find(c => c.name == constants.campaign.voicePrefix + args[1]);
-															if (voice) voice.delete();
-															CampaignModel.findOneAndUpdate({ id: args[1] }, { active: false }, { new: true }, function(err, response) {
-																if (response) {
-																	message.reply(constants.campaign.archiveSuccess + args[1]);
-																} else if (err) {
-																	console.log(err)
-																}
-															});
-														} else if (choice == constants.campaign.archiveCancel) {
-															message.reply(constants.campaign.cancelArchive);
-														}
-													}).catch(() => {
-														message.reply(constants.campaign.cancelArchive);
-													});
-												});	
-											} else {
-												message.reply(constants.campaign.noPermission);
-											}
-										});
-									} else {
-										message.reply(constants.campaign.noExist);
-									}
-								});								
-							} else {
-								message.reply(constants.campaign.noId);
-							}
-						} else if (args[0] == 'edit') {
-							if (args[1]) {
-								CampaignModel.findOne({ id: args[1] }).then( campaign => {
-									if (campaign) {
-										PlayerModel.findOne({ userId: user._id, campaignId: campaign._id }). then(player => {
-											if (player) {
-												var options = 'what would you like to do?\n`';
-												options += campaign.name ? '1. Update Campaign Name\n' : '1. Add Campaign Name\n';
-												options += campaign.description ? '2. Update Campaign Description\n' : '2. Add Campaign Description\n';
-												var index = 3;
-												if (campaign.voiceChannelId == null) {
-													options += index + '. Add Voice Channel\n';
-													index++;
-												}
-												if (player.leader) {
-													options += index + '. Transfer Leadership\n';
-													index++;
-												}
-												options += '<- Cancel`';
-
-
-												const user = constants.user;
-												const questionEdit = user.questionEdit;
-												const filter = response => {
-													return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-													&& response.author.id === message.author.id;
-												};
-
-												//TODO: I don't think we need to make this like the question thing before, but we should make these functions similar. This one is tough, so this is just the start of it.
-
-												message.reply(options).then(() => {
-													message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-														var userEditOption = collected.first().content.toLowerCase();
-														if (userEditOption === '1' || userEditOption === 'personality') {
-														} else if (userEditOption === '2' || userEditOption === 'personality') {
-														} else if (userEditOption === '3' || userEditOption === 'personality') {
-														} else if (userEditOption === '4' || userEditOption === 'personality') {
-															
-														} else if (userEditOption === 'cancel') {
-															message.reply('no changes then, got it.');
-														}
-													});
-												});
-
-												
-											} else {
-												message.reply('you do not have permission to archive this campaign.');
-											}
-										});
-
-									// check that the campaign exists
-									// check that the user is a player in campaign
-									// then show options to edit
-
-									// options are 
-										// add voice chat (if that option is null)
-											// if yes, create a voice channel and add the role for this campaign
-										// add/update nickname
-											// if yes, update DB model with new string
-										// add/update description
-											// if yes, update DB model with new string
-										// update leader player (if user is the leader)
-											// if yes, ask for the user to transfer to (just the @? UserId explicitly?)
-												// on response, change both player models to reflect switch
-
-									//otherwise, reply with "campaign does not exist" or "you do not have permission to edit this campaign"
-
-
-									} else {
-										message.reply('no such campaign exists.');
-									}
-								});
-
-							} else {
-								message.reply('be sure to include the id for your campaign (#campaign-1\'s id would be 1)');
-							}
 						} else if (args[0] == 'create') {
 							InfoModel.findOne({ serverId: message.guild.id }, (err, info) => {
 								if (info) {
-									message.reply('let\'s create your campaign then- you\'ll be the leader unless you appoint someone else.\nYou may add features like voice channels, a campaign nickname, or a short desciption by using \'!campaign edit [campaign id]\'');
 									// create the new campaign
 									new CampaignModel({ 
 										id: info.campaignCount + 1, 
@@ -515,12 +277,318 @@ bot.on('message', message => {
 													notes: null 
 												}).save();
 											});
+											message.reply(constants.campaign.create.success1 + campaign.id + constants.campaign.create.success2);
 										}).catch(console.error);
 									});
 								} else {
-									message.reply('whoops, something isn\'t set right on my end, cannot create campaigns at this time.');
+									message.reply(constants.campaign.create.fail);
 								}
 							});
+						} else if (args[0] == 'list') {
+							var list = "";
+							PlayerModel.find({ userId: user._id }).then( players => {
+								var ids = [];
+								players.forEach( player => {
+									ids.push(player.campaignId);
+								});
+								if (ids.length != 0) {
+									CampaignModel.find({ _id: { $in: ids }}).then(campaigns => {
+										campaigns.forEach( campaign => {
+											list += "Campaign #" + campaign.id;
+											if (campaign.name) list += " (" + campaign.name + ")";
+											list += campaign.active ? " [Ongoing]\n" : "[Archived]\n";
+										});
+									}).then(() => {
+										message.reply('here are your campaigns.\n```' + list + '```');
+									})	
+								} else {
+									message.reply("you are not currently a player in any campaigns.");
+								}
+							});						
+						} else { //needs a campaign id
+							if (!args[0]) {
+								message.reply(constants.campaign.noId);
+								return;
+							}
+							if ((args[1] == 'add' || args[1] == 'remove') && !args[2]) {
+								message.reply(constants.campaign.add.noTag);
+								return;
+							}
+							CampaignModel.findOne({ id: args[0] }).then( campaign => {
+								if (!campaign) { 
+									message.reply(constants.campaign.noExist);
+									return;
+								}
+								PlayerModel.findOne({ userId: user._id, campaignId: campaign._id }).then( player => {
+									if (!player) { 
+										message.reply("you are not a player in this campaign.");
+										return;
+									}
+									if (args[1] == 'add') {
+										if (player.leader) {
+											var newPlayerId = args[2].match(/\d/g).join("");
+											UserModel.findOne({ discordId: newPlayerId }).then( newUser => {
+												if (newUser) {
+													new PlayerModel({
+														username: newUser.username,
+														userId: newUser._id,
+														campaignId: campaign._id,
+														leader: false,
+														characters: null,
+														notes: null 
+													}).save();
+													const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
+													const member = message.mentions.members.first();
+													member.roles.add(role);
+													message.reply("successfully added <@" + newUser.discordId + "> to Campaign #" + campaign.id);
+												} else {
+													message.reply("this user has not enrolled yet. Please ask them to type `!enroll` first.");
+												}
+											});
+										} else {
+											message.reply("you do not have permission to add this user.");
+										}
+									} else if (args[1] == 'remove') {
+										if (player.leader) {
+											//check that the tagged player is in the campaign
+											var removePlayerId = args[2].match(/\d/g).join("");
+											UserModel.findOne({ discordId: removePlayerId }).then( removeUser => {
+												if (removeUser) {
+													PlayerModel.findOne({ userId: removeUser._id, campaignId: campaign._id }).then( removePlayer => {
+														if (removePlayer) { 
+															const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
+															const mentionedMember = message.mentions.members.first();
+															role.members.forEach(member => {
+																if (mentionedMember == member) {
+																	member.roles.remove(role); 
+																}
+															});
+															PlayerModel.findOneAndDelete({ userId: removeUser._id, campaignId: campaign._id }).then(deleted => {
+																if (deleted) {
+																	message.reply("successfully removed <@" + removeUser.discordId + "> from Campaign #" + campaign.id);
+																} else {
+																	message.reply("sorry, something went wrong. Try again later.");
+																}
+															})
+														} else {
+															message.reply("this user is not a player in this campaign.");
+														}
+													});
+												} else {
+													message.reply("this user has not enrolled yet. Please ask them to type `!enroll` first.");
+												}
+											});
+										} else {
+											message.reply("you do not have permission to remove this user.");
+										}
+									} else if (args[1] == 'leave') {
+										if (!player.leader) {
+											const filter = response => { return response.author.id === message.author.id; };
+											message.reply(constants.campaign.questionLeave).then(() => {
+												message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+													var choice = collected.first().content.toLowerCase();
+													if (choice == constants.campaign.leaveConfirm) {
+														const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
+														role.members.forEach(member => {
+															if (message.member == member) {
+																member.roles.remove(role); 
+															}
+														});
+														PlayerModel.findOneAndDelete({ userId: user._id, campaignId: campaign._id }).then(deleted => {
+															if (deleted) {
+																message.reply("you've been successfully removed from Campaign #" + campaign.id);
+															} else {
+																message.reply("sorry, something went wrong. Try again later.");
+															}
+														})
+													} else if (choice == constants.campaign.leaveCancel) {
+														message.reply(constants.campaign.cancelLeave);
+													}
+												}).catch(() => {
+													message.reply(constants.campaign.cancelLeave);
+												});
+											});
+										} else {
+											message.reply("you cannot leave this campaign if you're the leader. Try transferring leadership first, or archiving this campaign instead.");
+										}
+									} else if (args[1] == 'archive') {
+										if (!campaign.active){
+											message.reply(constants.campaign.noArchive);
+											return;
+										}
+										if (player.leader) {
+											const filter = response => { return response.author.id === message.author.id; };
+											message.reply(constants.campaign.questionArchive).then(() => {
+												message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+													var choice = collected.first().content.toLowerCase();
+													if (choice == constants.campaign.archiveConfirm) {
+														var channel = message.guild.channels.cache.find(c => c.name == constants.campaign.channelPrefix + args[0]);
+														let category = message.guild.channels.cache.find(c => c.name == constants.campaign.archiveCategory && c.type == "category");
+														if (category) channel.setParent(category.id);
+														var voice = message.guild.channels.cache.find(c => c.name == constants.campaign.voicePrefix + args[0]);
+														if (voice) voice.delete();
+														CampaignModel.findOneAndUpdate({ id: args[0] }, { active: false }, { new: true }, function(err, response) {
+															if (response) {
+																message.reply(constants.campaign.archiveSuccess + args[0]);
+															} else if (err) {
+																console.log(err)
+															}
+														});
+													} else if (choice == constants.campaign.archiveCancel) {
+														message.reply(constants.campaign.cancelArchive);
+													}
+												}).catch(() => {
+													message.reply(constants.campaign.cancelArchive);
+												});
+											});	
+										} else {
+											message.reply(constants.campaign.noPermission);
+										}
+									} else if (args[1] == 'edit') {
+										var options = constants.campaign.questionEdit.questionStart;
+										var optionNameIndex = "1";
+										var optionDescIndex = "2";
+										var optionVCIndex;
+										var optionLeaderIndex;
+										options += campaign.name ? constants.campaign.questionEdit.options.updateName : constants.campaign.questionEdit.options.addName;
+										options += campaign.description ? constants.campaign.questionEdit.options.updateDesc : constants.campaign.questionEdit.options.addDesc;
+										var index = 3;
+										if (isEmpty(campaign.voiceChannelId)) {
+											options += index + constants.campaign.questionEdit.options.addVoice;
+											optionVCIndex = index + "";
+											index++;
+										}
+										if (player.leader) {
+											options += index + constants.campaign.questionEdit.options.transferLeader;
+											optionLeaderIndex = index + "";
+											index++;
+										}
+										options += constants.campaign.questionEdit.questionEnd;
+
+										const questionEdit = constants.campaign.questionEdit;
+										const filter = response => {
+											return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
+											&& response.author.id === message.author.id;
+										};
+
+										message.reply(options).then(() => {
+											message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+												//var campaignChannel = message.guild.channels.cache.find(c => c.name == constants.campaign.channelPrefix + args[0]);
+												var userEditOption = collected.first().content.toLowerCase();
+												if (userEditOption === 'cancel') {
+													message.reply(constants.campaign.cancelEdit);
+												} else {
+													switch(userEditOption) {
+														case "cancel":
+															message.reply(constants.campaign.cancelEdit);
+															break;
+														case optionNameIndex:
+															message.reply(constants.campaign.nameQuestion).then(() => {
+																const filter = response => { return response.author.id === message.author.id; };
+																message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+																	var campaignName = collected.first().content;
+																	CampaignModel.findOneAndUpdate({ id: args[0] }, { name: campaignName }, { new: true }, function(err, response) {
+																		if (response) {
+																			// TODO: Setting a channel's topic sometimes just, wouldn't work. Not sure if it's worth it to try and fix when I don't know what error we're even getting back?
+																			// var campaignDesc = campaign.description ? campaign.description : "";
+																			// campaignChannel.setTopic(campaignName + ": " + campaignDesc)
+																			// 	.then(console.log("Updated!"))
+																			// 	.catch(console.log("Error'd out"));
+																			message.reply(constants.campaign.nameSuccess + args[0] + " to \"" + campaignName + "\"");
+																		} else if (err) {
+																			console.log(err)
+																		}
+																	});
+																}).catch(() => {
+																	message.reply(constants.campaign.timeout);
+																});
+															});
+															break;
+														case optionDescIndex:
+															message.reply(constants.campaign.descQuestion).then(() => {
+																const filter = response => { return response.author.id === message.author.id; };
+																message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+																	var campaignDesc = collected.first().content;
+																	CampaignModel.findOneAndUpdate({ id: args[0] }, { description: campaignDesc }, { new: true }, function(err, response) {
+																		if (response) {
+																			// TODO: Setting a channel's topic sometimes just, wouldn't work. Not sure if it's worth it to try and fix when I don't know what error we're even getting back?
+																			// var campaignName = campaign.name ? campaign.name : "Campaign-" + args[0];
+																			// campaignChannel.setTopic(campaignName + ": " + campaignDesc)
+																			// 	.then(newChannel => console.log("Channel's new topic is" + newChannel.topic))
+																			// 	.catch(console.log("nope"));
+																			message.reply(constants.campaign.descSuccess + args[0]);
+																		} else if (err) {
+																			console.log(err)
+																		}
+																	});
+																}).catch(() => {
+																	message.reply(constants.campaign.timeout);
+																});
+															});
+															break;
+														case optionVCIndex:
+															// add a voice channel for the given campaign
+															message.guild.channels.create(constants.campaign.voicePrefix + campaign.id, { type: "voice" }).then(voiceChannel => {
+																let category = message.guild.channels.cache.find(c => c.name == "Campaigns" && c.type == "category");
+																if (category) voiceChannel.setParent(category.id);
+																var role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id)
+																console.log(role);
+																//TODO: need to fgure out why this didn't work before
+																voiceChannel.updateOverwrite(role, { SPEAK: true, MUTE_MEMBERS: true, DEAFEN_MEMBERS: true, STREAM: true});
+																CampaignModel.findByIdAndUpdate(campaign._id, { voiceChannelId: voiceChannel.id }).then(() => {
+																	console.log("updated");
+																});
+																message.reply(constants.campaign.vcSuccess + args[0]);
+															}).catch(console.error);
+
+															break;
+														case optionLeaderIndex:
+															message.reply(constants.campaign.leaderTransferQuestion).then(() => {
+																const filter = response => { return response.author.id === message.author.id; };
+																message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
+																	var transferPlayerId = collected.first().content.match(/\d/g).join("");
+																	UserModel.findOne({ discordId: transferPlayerId }).then( transferUser => {
+																		if (transferUser) {
+																			PlayerModel.findOne({ userId: transferUser._id, campaignId: campaign._id }).then( transferPlayer => {
+																				if (transferPlayer) { 
+																					PlayerModel.findOneAndUpdate({ userId: transferPlayer.userId, campaignId: campaign._id }, { leader: true }, { new: true }, function(err, response1) {
+																						if (response1) {
+																							PlayerModel.findOneAndUpdate({ userId: player.userId, campaignId: campaign._id }, { leader: false }, { new: true }, function(err, response2) {
+																								if (response2) {
+																										message.reply("successfully transferred leadership role to <@" + transferUser.discordId + "> for Campaign #" + campaign.id);
+																								} else if (err) {
+																									message.reply("sorry, something went wrong. Try again later.");
+																								}
+																							});
+																						} else if (err) {
+																							message.reply("sorry, something went wrong. Try again later.");
+																						}
+																					});
+																				} else {
+																					message.reply("this user is not a player in this campaign, add them with `!campaign " + campaign.id + " add <@" + transferUser.discordId + ">`.");
+																				}
+																			});
+																		} else {
+																			message.reply("this user has not enrolled yet. Please ask them to type `!enroll` first.");
+																		}
+																	});
+																}).catch(() => {
+																	message.reply(constants.campaign.timeout);
+																});
+															});
+															break;
+													}	
+												}
+											}).catch(() => {
+												message.reply(constants.campaign.cancelEdit);
+											});
+										});								
+									}
+								});							
+							}).catch(() => {
+								message.reply("sorry, not sure what that means. Make sure your arguments are correct.");
+							});
+							 
 						}
 						break;
 						//	message.reply('you\'re not in a session right now. Use \'!campaign list\' to see your available campaigns, and \'!session start [campaign id]\' to start a session for a campaign.');

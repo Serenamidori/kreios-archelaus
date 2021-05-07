@@ -45,6 +45,25 @@
         "cancel": "I won't change how I act around you then."     
     },
     "campaign": {
+        "create": {
+            "success1": "successfully created your campaign, **campaign-",
+            "success2": "**! You're the leader, unless you want to appoint someone else.\nYou may add features like voice channels, a campaign nickname, or a short desciption by using `!campaign [campaign id] edit`",
+            "fail": "whoops, something isn't set right on my end, cannot create campaigns at this time."
+        },
+        "questionEdit": {
+            "questionStart": "what would you like to do? (Respond with a number only)\n`",
+            "options": {
+                "addName": "1. Add Campaign Name\n",
+                "updateName": "1. Update Campaign Name\n",
+                "addDesc": "2. Add Campaign Description\n",
+                "updateDesc": "2. Update Campaign Description\n",
+                "addVoice": ". Add Voice Channel\n",
+                "transferLeader": ". Transfer Leadership\n"
+        },
+            "questionEnd": "<- Cancel`",
+            "answers": ["1", "2", "3", "4", "cancel"]
+        },
+        "cancelEdit": "No edits to this campaign then, got it",
         "noCommand": "please specify a command.\n**list** - Gives a list of your on-going campaigns.\n**create** - Creates a new campaign.",
         "noId": "be sure to include the id for your campaign (Example: #campaign-1's id would be 1)",
         "noExist": "no such campaign exists.",
@@ -60,7 +79,7 @@
         "questionArchive": "are you sure you would like to archive this campaign? (yes/no)",
         "archiveConfirm": "yes",
         "archiveCancel": "no" ,
-        "questionLeave": "are you sure you would like to archive this campaign? (yes/no)",
+        "questionLeave": "are you sure you want to leave this campaign? (yes/no)",
         "leaveConfirm": "yes",
         "leaveCancel": "no" ,
         "cancelLeave": "I won't remove you then.",
@@ -68,7 +87,15 @@
         "channelPrefix": "campaign-",
         "voicePrefix": "vc-campaign-",
         "archiveCategory": "Old Campaigns",
-        "archiveSuccess": "successfully archived Campaign #"
+        "archiveSuccess": "successfully archived Campaign #",
+        "nameQuestion": "what would you like to name your campaign?",
+        "nameSuccess": "successfully named Campaign #", 
+        "descQuestion": "what is a short description of your campaign?",
+        "descSuccess": "successfully updated the description for Campaign #", 
+        "leaderTransferQuestion": "who should be the leader? (Respond by tagging the user)",
+        "leaderTransferSuccess": "successfully updated the description for Campaign #", 
+        "vcSuccess": "successfully created a voice channel for Campaign #", 
+        "timeout": "you took a little too long to respond, I won't make any changes for now."
     }, 
     "diceRoller": {
         "normal": [

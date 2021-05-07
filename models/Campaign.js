@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const User = require('./User');
 
 const Campaign = Schema({
     id: Number,
@@ -7,7 +8,12 @@ const Campaign = Schema({
     name: String,
     description: String,
     interventionPoints: Number,
-    active: Boolean
+    active: Boolean,
+    notes: {
+        author: String,
+        date: String,
+        note: String
+    }
 });
 
 module.exports = model('Campaign', Campaign);

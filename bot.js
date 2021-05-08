@@ -22,18 +22,6 @@ bot.on('ready', () => {
 	console.info(`Logged in as ${bot.user.tag}`);
 });
 
-// String Arrays
-// var responses = [
-// 	["Oh fuck, that's a ", "_Eeeesh_, it's a "], // 0-9%
-// 	["Good luck with a ", "Oh well, can't do much with a ", "Oof, that's a "], // 10-25%	
-// 	["You get a ", "It's a ", "I bestow you a "], // 26-74%
-// 	["Not bad, you got a ", "Oh wow, that's a ", "Nice, it's a "], // 75-90%
-// 	["_Yoooo_, it's a ", "Oh damn, you got a "], // 91-100%
-// 	["Critical fail, you rolled a natural 1 there buddy. Your total is "], // crit fail
-// 	["Critical Success! You rolled a natural 20! Your total is "], // crit success
-// 	["Incredible, a natural 20 _and_ natural 1? Hope you were rolling with advantage, buddy! Your total is "], // both crits
-// ];
-
 // Intervention table
 var interventions = [
 	"New Entity\n> An entity refers to any person or group of persons that are remotely autonomous, not simply specific NPCs and monsters. For inspirations, I recommend using `!npc` commands or `!portent`",
@@ -43,40 +31,6 @@ var interventions = [
 	"Regress Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Regressing a plot should help the adventure progress, just by hindering a certain goal or plot point.",
 	"Wild\n> Something unexpected! This is the option that allows for sudden twists of fate. Because a wild Intervention is so vague in what it can represent, I recommend you use `!portent` to figure out what the heck it actually means."
 ];
-
-// TWENE table
-// var twene = [
-// 	"Let's **increase a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
-// 	"Let's **decrease a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
-// 	"Let's **add a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element now exists in the scene that you weren’t previously aware of.", 
-// 	"Let's **remove a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element that should normally exist in the scene does not exist here.", 
-// 	"Let's **increase a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
-// 	"Let's **decrease a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
-// 	"Let's **add a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element now exists in the scene that you weren’t previously aware of.", 
-// 	"Let's **remove a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element that should normally exist in the scene does not exist here.", 
-// 	"Let's try a **wild positive!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is positive, but because it can be a little obscure, you can use `!portent` to help decide what happens next.", 
-// 	"Let's try a **wild negative!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is negative, but because it can be a little obscure, you can use `!portent` to help decide what happens next"];
-
-// NPC Attitude table
-// var npcAttitude = ["They are hostile towards you.", "They are neutral towards you.", "They are friendly towards you."];
-
-// NPC Build table
-// [0] Races (common), [1] Races (uncommon), [2] Races (monster), [3] Classes, [4] Genders, [5] Color, [6] Hair length, [7] Height, [8] Weight, [9] Misc.
-// var npcBuild = [
-// 	["human", "elf", "dwarf", "half-elf", "gnome", "halfling", "drow"],
-// 	["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg", "centaur", "satyr", "pixie", "sprite", " goliath"],
-// 	["goblin", "hobgoblin", "bugbear", "kobold", "yuan-ti"],
-// 	["wizard", "fighter", "sorcerer", "warlock", "paladin", "cleric", "barbarian", "bard", "artificer", "ranger", "druid", "monk", "rogue"],
-// 	["male", "female", "nonbinary"],
-// 	["black", "white", "brown", "orange", "red", "pink", "blue", "purple", "green", "yellow"],
-// 	["short hair", "long hair", "medium hair"],
-// 	["short", "tall", "average"],
-// 	["heavy", "thin", "average"],
-// 	["freckles", "scar", "beauty mark", "missing eye/limb", "facial hair", "glasses"]
-// ];
-
-// Intervention point tracker
-// var interventionPoints = 0;
 
 // Generates a random number, default 1-20
 function rand (sides) {
@@ -121,18 +75,6 @@ function isEmpty(string){
 	return (string == null || string.length === 0);
 }	
 
-// Adds an intervention point to the score and handles when we reach 3
-function addInterventionPoint (channelId) {
-	interventionPoints++;
-	var responses = [
-		"Surprise!", "Time for an", "Look out!", "BOO!"
-	];
-	if (interventionPoints >= 3) {
-		message.reply(responses[rand(responses.length-1)] + ' Intervention:** ' + interventions[rand(6)-1]);
-		interventionPoints = 0;
-	}
-}
-
 bot.on('message', message => { 
 	// Prevents Kreios from responding to his own messages
 	if (message.author.id == bot.user.id) return;
@@ -141,504 +83,76 @@ bot.on('message', message => {
 		const constants = require('./messages/constants.json');
 
 		// check for user enrollment before anything else, and use this variable throughout the commands
-		UserModel.findOne({ discordId: message.author.id, }).then(user => {
-			// commands
-			if (message.content.substring(0, 1) == '!') {
-				var args = message.content.substring(1).split(/ +/);
-				var cmd = args[0]; 
-				args = args.splice(1);
-				switch(cmd) {
-					case '':
-						if (args.length != 0) {
-							message.reply(constants.general.noCommand);
-						}
-						break;
-					case 'enroll':
-						if (user) {
-							message.reply(constants.enroll.enrolled);
+		if (message.content.substring(0, 1) == '!') {
+			var args = message.content.substring(1).split(/ +/);
+			var cmd = args[0]; 
+			args = args.splice(1);
+
+			switch(cmd) {
+				case '':
+					if (args.length != 0) {
+						message.reply(constants.general.noCommand);
+					}
+					break;
+				case 'setCampaign':
+				case 'setcampaign':
+				case 'set_campaign':
+					CampaignModel.findOne({ channelId: message.channel.id, }).then(campaign => {
+						if (campaign) {
+							message.reply('this channel is already set as a campaign, you can start playing whenever you like.');
 						} else {
-							const questionPersonality = constants.enroll.questionPersonality;
-							const filter = response => {
-								return questionPersonality.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-								&& response.author.id === message.author.id;
-							};
-							message.reply(questionPersonality.question).then(() => {
-								message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-									var pref = collected.first().content.toLowerCase();
-									message.reply(questionPersonality[pref]);
-									new UserModel({ 
-										username: message.author.username, 
-										discordId: message.author.id, 
-										personalityPref: constants.general.translatePersonality[pref] 
-									}).save();
-								})
-								.catch(() => {
-									message.reply(constants.general.nothingNevermind);
-								});
-							});	
-						}
-						break;
-					case 'user':
-						if (!user) {
-							message.reply('you aren\'t enrolled yet. Please do so by typing `!enroll`');
-							return;
-						}
-						if (args.length == 0) {
-							message.reply('here are your current user settings.\n```Name: ' + message.author.username + '\nPersonality Preference: ' + user.personalityPref + '```');
-						} else if (args[0] == 'edit') {
-							const questionEdit = constants.user.questionEdit;
-							const filter = response => {
-								return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-								&& response.author.id === message.author.id;
-							};
-							message.reply(questionEdit.question).then(() => {
-								message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-									var userEditOption = collected.first().content.toLowerCase();
-									if (userEditOption == '1') { // personality
-										const questionPersonality = constants.user.questionPersonality;
-										const filter = response => {
-											return questionPersonality.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-											&& response.author.id === message.author.id;
-										};
-										message.reply(questionPersonality.question).then(() => {
-											message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-												var pref = collected.first().content.toLowerCase();
-												UserModel.findOneAndUpdate({ discordId: message.author.id }, { 
-													personalityPref: constants.general.translatePersonality[pref] 
-												}, { new: true }, function(err, response) {
-													if (response) {
-														message.reply(questionPersonality[pref]);
-													} else if (err) {
-														console.log(err)
-													}
-												});
-											})
-											.catch(() => {
-												message.reply(constants.enroll.cancel);
-											});
-										});	
-									} else if (userEditOption === 'cancel') {
-										message.reply(constants.enroll.cancel);
-									}
-								});
-							});			
-						}
-						break;
-					case 'campaign':
-						if (!user) {
-							message.reply(constants.user.notEnrolled);
-							return;
-						}
-						if (args.length == 0) {
-							message.reply(constants.campaign.noCommand); 
-						} else if (args[0] == 'create') {
-							InfoModel.findOne({ serverId: message.guild.id }, (err, info) => {
-								if (info) {
-									// create the new campaign
-									new CampaignModel({ 
-										id: info.campaignCount + 1, 
-										channelId: null,
-										voiceChannelId: null,
-										name: null,
-										description: null,
-										interventionPoints: 0, 
-										active: true 
-									}).save().then(campaign => {
-										// campaign created, create new campaign channel
-										message.guild.channels.create('campaign-' + campaign.id, { type: "text" }).then(channel => {
-											// channel created, add to Campaign category if available
-											let category = message.guild.channels.cache.find(c => c.name == "Campaigns" && c.type == "category");
-											if (category) channel.setParent(category.id);
-											// create new campaign role
-											message.guild.roles.create({
-												data: {
-													name: "campaign-" + campaign.id,
-													color: "GREYPLE",
-													mentionable: true
-												},
-												reason:"Campaign creation",
-											}).then((role) => {
-												// role created, add role to user and channel with correct permissions
-												message.member.roles.add(role);
-												channel.updateOverwrite(role, { SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true });
-											}).catch(console.error);
-											
-											// update campaign with channel
-											CampaignModel.findByIdAndUpdate(campaign._id, { channelId: channel.id }).then(() => {
-												// update server info campaign counter
-												InfoModel.findByIdAndUpdate(info._id, { campaignCount: info.campaignCount + 1 }).then(() => {});
-												// create player model with user and campaign models
-												new PlayerModel({
-													username: user.username,
-													userId: user._id,
-													campaignId: campaign._id,
-													leader: true,
-													characters: null,
-													notes: null 
-												}).save();
-											});
-											message.reply(constants.campaign.create.success1 + campaign.id + constants.campaign.create.success2);
-										}).catch(console.error);
-									});
-								} else {
-									message.reply(constants.campaign.create.fail);
-								}
+							new CampaignModel({ channelId: message.channel.id, interventionPoints: 0 }).save().then(campaign => {
+								message.reply('this channel is now a campaign, I\'ll keep track of your Intervention Points while you play here.');
 							});
-						} else if (args[0] == 'list') {
-							var list = "";
-							PlayerModel.find({ userId: user._id }).then( players => {
-								var ids = [];
-								players.forEach( player => {
-									ids.push(player.campaignId);
-								});
-								if (ids.length != 0) {
-									CampaignModel.find({ _id: { $in: ids }}).then(campaigns => {
-										campaigns.forEach( campaign => {
-											list += "Campaign #" + campaign.id;
-											if (campaign.name) list += " (" + campaign.name + ")";
-											list += campaign.active ? " [Ongoing]\n" : "[Archived]\n";
-										});
-									}).then(() => {
-										message.reply('here are your campaigns.\n```' + list + '```');
-									})	
-								} else {
-									message.reply("you are not currently a player in any campaigns.");
-								}
-							});						
-						} else { //needs a campaign id
-							if (!args[0]) {
-								message.reply(constants.campaign.noId);
-								return;
-							}
-							if ((args[1] == 'add' || args[1] == 'remove') && !args[2]) {
-								message.reply(constants.campaign.add.noTag);
-								return;
-							}
-							CampaignModel.findOne({ id: args[0] }).then( campaign => {
-								if (!campaign) { 
-									message.reply(constants.campaign.noExist);
-									return;
-								}
-								PlayerModel.findOne({ userId: user._id, campaignId: campaign._id }).then( player => {
-									if (!player) { 
-										message.reply("you are not a player in this campaign.");
-										return;
-									}
-									if (args[1] == 'add') {
-										if (player.leader) {
-											var newPlayerId = args[2].match(/\d/g).join("");
-											UserModel.findOne({ discordId: newPlayerId }).then( newUser => {
-												if (newUser) {
-													new PlayerModel({
-														username: newUser.username,
-														userId: newUser._id,
-														campaignId: campaign._id,
-														leader: false,
-														characters: null,
-														notes: null 
-													}).save();
-													const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
-													const member = message.mentions.members.first();
-													member.roles.add(role);
-													message.reply("successfully added <@" + newUser.discordId + "> to Campaign #" + campaign.id);
-												} else {
-													message.reply("this user has not enrolled yet. Please ask them to type `!enroll` first.");
-												}
-											});
-										} else {
-											message.reply("you do not have permission to add this user.");
-										}
-									} else if (args[1] == 'remove') {
-										if (player.leader) {
-											//check that the tagged player is in the campaign
-											var removePlayerId = args[2].match(/\d/g).join("");
-											UserModel.findOne({ discordId: removePlayerId }).then( removeUser => {
-												if (removeUser) {
-													PlayerModel.findOne({ userId: removeUser._id, campaignId: campaign._id }).then( removePlayer => {
-														if (removePlayer) { 
-															const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
-															const mentionedMember = message.mentions.members.first();
-															role.members.forEach(member => {
-																if (mentionedMember == member) {
-																	member.roles.remove(role); 
-																}
-															});
-															PlayerModel.findOneAndDelete({ userId: removeUser._id, campaignId: campaign._id }).then(deleted => {
-																if (deleted) {
-																	message.reply("successfully removed <@" + removeUser.discordId + "> from Campaign #" + campaign.id);
-																} else {
-																	message.reply("sorry, something went wrong. Try again later.");
-																}
-															})
-														} else {
-															message.reply("this user is not a player in this campaign.");
-														}
-													});
-												} else {
-													message.reply("this user has not enrolled yet. Please ask them to type `!enroll` first.");
-												}
-											});
-										} else {
-											message.reply("you do not have permission to remove this user.");
-										}
-									} else if (args[1] == 'leave') {
-										if (!player.leader) {
-											const filter = response => { return response.author.id === message.author.id; };
-											message.reply(constants.campaign.questionLeave).then(() => {
-												message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-													var choice = collected.first().content.toLowerCase();
-													if (choice == constants.campaign.leaveConfirm) {
-														const role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id);
-														role.members.forEach(member => {
-															if (message.member == member) {
-																member.roles.remove(role); 
-															}
-														});
-														PlayerModel.findOneAndDelete({ userId: user._id, campaignId: campaign._id }).then(deleted => {
-															if (deleted) {
-																message.reply("you've been successfully removed from Campaign #" + campaign.id);
-															} else {
-																message.reply("sorry, something went wrong. Try again later.");
-															}
-														})
-													} else if (choice == constants.campaign.leaveCancel) {
-														message.reply(constants.campaign.cancelLeave);
-													}
-												}).catch(() => {
-													message.reply(constants.campaign.cancelLeave);
-												});
-											});
-										} else {
-											message.reply("you cannot leave this campaign if you're the leader. Try transferring leadership first, or archiving this campaign instead.");
-										}
-									} else if (args[1] == 'archive') {
-										if (!campaign.active){
-											message.reply(constants.campaign.noArchive);
-											return;
-										}
-										if (player.leader) {
-											const filter = response => { return response.author.id === message.author.id; };
-											message.reply(constants.campaign.questionArchive).then(() => {
-												message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-													var choice = collected.first().content.toLowerCase();
-													if (choice == constants.campaign.archiveConfirm) {
-														var channel = message.guild.channels.cache.find(c => c.name == constants.campaign.channelPrefix + args[0]);
-														let category = message.guild.channels.cache.find(c => c.name == constants.campaign.archiveCategory && c.type == "category");
-														if (category) channel.setParent(category.id);
-														var voice = message.guild.channels.cache.find(c => c.name == constants.campaign.voicePrefix + args[0]);
-														if (voice) voice.delete();
-														CampaignModel.findOneAndUpdate({ id: args[0] }, { active: false }, { new: true }, function(err, response) {
-															if (response) {
-																message.reply(constants.campaign.archiveSuccess + args[0]);
-															} else if (err) {
-																console.log(err)
-															}
-														});
-													} else if (choice == constants.campaign.archiveCancel) {
-														message.reply(constants.campaign.cancelArchive);
-													}
-												}).catch(() => {
-													message.reply(constants.campaign.cancelArchive);
-												});
-											});	
-										} else {
-											message.reply(constants.campaign.noPermission);
-										}
-									} else if (args[1] == 'edit') {
-										var options = constants.campaign.questionEdit.questionStart;
-										var optionNameIndex = "1";
-										var optionDescIndex = "2";
-										var optionVCIndex;
-										var optionLeaderIndex;
-										options += campaign.name ? constants.campaign.questionEdit.options.updateName : constants.campaign.questionEdit.options.addName;
-										options += campaign.description ? constants.campaign.questionEdit.options.updateDesc : constants.campaign.questionEdit.options.addDesc;
-										var index = 3;
-										if (isEmpty(campaign.voiceChannelId)) {
-											options += index + constants.campaign.questionEdit.options.addVoice;
-											optionVCIndex = index + "";
-											index++;
-										}
-										if (player.leader) {
-											options += index + constants.campaign.questionEdit.options.transferLeader;
-											optionLeaderIndex = index + "";
-											index++;
-										}
-										options += constants.campaign.questionEdit.questionEnd;
-
-										const questionEdit = constants.campaign.questionEdit;
-										const filter = response => {
-											return questionEdit.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase())
-											&& response.author.id === message.author.id;
-										};
-
-										message.reply(options).then(() => {
-											message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-												//var campaignChannel = message.guild.channels.cache.find(c => c.name == constants.campaign.channelPrefix + args[0]);
-												var userEditOption = collected.first().content.toLowerCase();
-												if (userEditOption === 'cancel') {
-													message.reply(constants.campaign.cancelEdit);
-												} else {
-													switch(userEditOption) {
-														case "cancel":
-															message.reply(constants.campaign.cancelEdit);
-															break;
-														case optionNameIndex:
-															message.reply(constants.campaign.nameQuestion).then(() => {
-																const filter = response => { return response.author.id === message.author.id; };
-																message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-																	var campaignName = collected.first().content;
-																	CampaignModel.findOneAndUpdate({ id: args[0] }, { name: campaignName }, { new: true }, function(err, response) {
-																		if (response) {
-																			// TODO: Setting a channel's topic sometimes just, wouldn't work. Not sure if it's worth it to try and fix when I don't know what error we're even getting back?
-																			// var campaignDesc = campaign.description ? campaign.description : "";
-																			// campaignChannel.setTopic(campaignName + ": " + campaignDesc)
-																			// 	.then(console.log("Updated!"))
-																			// 	.catch(console.log("Error'd out"));
-																			message.reply(constants.campaign.nameSuccess + args[0] + " to \"" + campaignName + "\"");
-																		} else if (err) {
-																			console.log(err)
-																		}
-																	});
-																}).catch(() => {
-																	message.reply(constants.campaign.timeout);
-																});
-															});
-															break;
-														case optionDescIndex:
-															message.reply(constants.campaign.descQuestion).then(() => {
-																const filter = response => { return response.author.id === message.author.id; };
-																message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-																	var campaignDesc = collected.first().content;
-																	CampaignModel.findOneAndUpdate({ id: args[0] }, { description: campaignDesc }, { new: true }, function(err, response) {
-																		if (response) {
-																			// TODO: Setting a channel's topic sometimes just, wouldn't work. Not sure if it's worth it to try and fix when I don't know what error we're even getting back?
-																			// var campaignName = campaign.name ? campaign.name : "Campaign-" + args[0];
-																			// campaignChannel.setTopic(campaignName + ": " + campaignDesc)
-																			// 	.then(newChannel => console.log("Channel's new topic is" + newChannel.topic))
-																			// 	.catch(console.log("nope"));
-																			message.reply(constants.campaign.descSuccess + args[0]);
-																		} else if (err) {
-																			console.log(err)
-																		}
-																	});
-																}).catch(() => {
-																	message.reply(constants.campaign.timeout);
-																});
-															});
-															break;
-														case optionVCIndex:
-															// add a voice channel for the given campaign
-															message.guild.channels.create(constants.campaign.voicePrefix + campaign.id, { type: "voice" }).then(voiceChannel => {
-																let category = message.guild.channels.cache.find(c => c.name == "Campaigns" && c.type == "category");
-																if (category) voiceChannel.setParent(category.id);
-																var role = message.guild.roles.cache.find(role => role.name === "campaign-" + campaign.id)
-																console.log(role);
-																//TODO: need to fgure out why this didn't work before
-																voiceChannel.updateOverwrite(role, { SPEAK: true, MUTE_MEMBERS: true, DEAFEN_MEMBERS: true, STREAM: true});
-																CampaignModel.findByIdAndUpdate(campaign._id, { voiceChannelId: voiceChannel.id }).then(() => {
-																	console.log("updated");
-																});
-																message.reply(constants.campaign.vcSuccess + args[0]);
-															}).catch(console.error);
-
-															break;
-														case optionLeaderIndex:
-															message.reply(constants.campaign.leaderTransferQuestion).then(() => {
-																const filter = response => { return response.author.id === message.author.id; };
-																message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] }).then(collected => {
-																	var transferPlayerId = collected.first().content.match(/\d/g).join("");
-																	UserModel.findOne({ discordId: transferPlayerId }).then( transferUser => {
-																		if (transferUser) {
-																			PlayerModel.findOne({ userId: transferUser._id, campaignId: campaign._id }).then( transferPlayer => {
-																				if (transferPlayer) { 
-																					PlayerModel.findOneAndUpdate({ userId: transferPlayer.userId, campaignId: campaign._id }, { leader: true }, { new: true }, function(err, response1) {
-																						if (response1) {
-																							PlayerModel.findOneAndUpdate({ userId: player.userId, campaignId: campaign._id }, { leader: false }, { new: true }, function(err, response2) {
-																								if (response2) {
-																										message.reply("successfully transferred leadership role to <@" + transferUser.discordId + "> for Campaign #" + campaign.id);
-																								} else if (err) {
-																									message.reply("sorry, something went wrong. Try again later.");
-																								}
-																							});
-																						} else if (err) {
-																							message.reply("sorry, something went wrong. Try again later.");
-																						}
-																					});
-																				} else {
-																					message.reply("this user is not a player in this campaign, add them with `!campaign " + campaign.id + " add <@" + transferUser.discordId + ">`.");
-																				}
-																			});
-																		} else {
-																			message.reply("this user has not enrolled yet. Please ask them to type `!enroll` first.");
-																		}
-																	});
-																}).catch(() => {
-																	message.reply(constants.campaign.timeout);
-																});
-															});
-															break;
-													}	
-												}
-											}).catch(() => {
-												message.reply(constants.campaign.cancelEdit);
-											});
-										});								
-									}
-								});							
-							}).catch(() => {
-								message.reply("sorry, not sure what that means. Make sure your arguments are correct.");
-							});
-							 
 						}
-						break;
-						//	message.reply('you\'re not in a session right now. Use \'!campaign list\' to see your available campaigns, and \'!session start [campaign id]\' to start a session for a campaign.');
-					case 'npc':
-						if (args.length == 0) {
-							message.reply('please specify what you\'d like to know about this NPC.\n**attitude** - Gives the demeanor of the NPC towards you.\n**build** - Creates a random NPC description to work with.'); 
-						}
-						// build
-						if (args[0] == 'build') {
-							const npcBuild = constants.npcBuild;
-							var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
-							
-							var raceArray = npcBuild[0];
-							if (contains(args, 'uncommon') || contains(args, 'u')) {
-								raceArray = raceArray.concat(npcBuild[1]);
-							} if (contains(args, 'rare') || contains(args, 'r')) {
-								raceArray = raceArray.concat(npcBuild[2]);
-							} if (contains(args, 'monster') || contains(args, 'm')) {
-								raceArray = npcBuild[2];
-							}
-							npc += "```\n Race: " + raceArray[rand(raceArray.length)-1];
-
-							if (contains(args, 'class') || contains(args, 'c')) {
-								npc += "\n Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
-							}  
-							//check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
-							npc += "\n Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
-								"\n Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-								"\n Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
-								"\n Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-								"\n Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
-								"\n Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
-								"\n Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
-
-							npc = npc + '```';
-							// TODO: Make this a helper method instead, and take in multiple arguments without issue
-							message.reply(npc);
-						}
-						// attitude
-						if (args[0] == 'attitude') {
-							message.reply(npcAttitude[rand(3)-1]);
-						}
-						break;
-					case 'oracle':
-						// Make sure a SESSION is going for the player.
-
-
-						const oracle = constants.oracle;
+					});
+					break;
+				case 'npc':
+					if (args.length == 0) {
+						message.reply('be sure to specify what you\'d like to know about this NPC.\n**attitude** - Gives the demeanor of the NPC towards you.\n**build** - Creates a random NPC description to work with.'); 
+					}
+					// build
+					if (args[0] == 'build') {
+						const npcBuild = constants.npcBuild;
+						var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
 						
-						var ips = 0;
+						var raceArray = npcBuild[0];
+						if (contains(args, 'uncommon') || contains(args, 'u')) {
+							raceArray = raceArray.concat(npcBuild[1]);
+						} if (contains(args, 'rare') || contains(args, 'r')) {
+							raceArray = raceArray.concat(npcBuild[2]);
+						} if (contains(args, 'monster') || contains(args, 'm')) {
+							raceArray = npcBuild[2];
+						}
+						npc += "```\n Race: " + raceArray[rand(raceArray.length)-1];
+
+						if (contains(args, 'class') || contains(args, 'c')) {
+							npc += "\n Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
+						}  
+						//check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
+						npc += "\n Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
+							"\n Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+							"\n Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
+							"\n Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+							"\n Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
+							"\n Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
+							"\n Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
+
+						npc = npc + '```';
+						// TODO: Make this a helper method instead, and take in multiple arguments without issue
+						message.reply(npc);
+					}
+					// attitude
+					if (args[0] == 'attitude') {
+						message.reply(npcAttitude[rand(3)-1]);
+					}
+					break;
+				case 'o':
+				case 'oracle':
+					CampaignModel.findOne({ channelId: message.channel.id, }).then(campaign => {
+						const oracle = constants.oracle;
+					
+						var ips = campaign ? campaign.interventionPoints : 0;
 						var roll = rand(6);
 						if (roll == 6) {
 							ips++;
@@ -659,102 +173,107 @@ bot.on('message', message => {
 							}
 						}
 						message.reply(oracle[roll]);
-
-						//TODO: Add IP to the Session IP counter
-						// handle intervention points after all rolls
-						// for (i = 0; i < ips; i++) {
-						// 	addInterventionPoint(channelId);
-						// }
-						break;
-					case 'portent':
-						var responses = [
-							"Use these words for inspiration", "Here, try these words", "Let these jog your imagination", "Look, I'm not a dictionary, but I know some helpful words"
-						];
-						var index1 = rand(3)-1;
-						var index2 = rand(3)-1;
-						var word1 = portents[index1][rand(portents[index1].length)-1];
-						var word2 = portents[index2][rand(portents[index2].length)-1];
-
-						message.reply(responses[rand(responses.length-1)] + ': "' + word1 + '" and "' + word2 + '"');
-						break;
-					case 'twene':
-						message.reply('Ah, so things are not as expected? ' + twene[rand(twene.length-1)]);
-						break;
-					case 'flip':
-						var coin = rand(2) == 2 ? "heads" : "tails";
-						message.reply('I flipped a coin for you, it was ' + coin + '.' );
-						break;
-					case 'kroll':
-						// set defaults
-						var numbers = [];
-						var total = 0;
-						var count = 1;
-						var sides = 20;
-						var symbol;
-						var bonus;
-						var critSuccess = false;
-						var critFail = false;
-						// set up dice
-						var dice = message.content.match(/(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/);
-						if (dice) {
-							count = dice[1] ? dice[1] : count;
-							sides = dice[2];
-							symbol = dice[4];
-							bonus = dice[5];
-						}
-						// handle d0 dice
-						if (sides == 0) {
-							message.reply('Look- it\'s fucking nothing!'); 
-							return;
-						}
-						// roll all dice
-						for (i = 0; i < count; i++) {
-							numbers[i] = rand(sides);
-							total += numbers[i];
-							// account for crits
-							critSuccess = critSuccess || numbers[i] == sides;
-							critFail = critFail || numbers[i] == 1;
-						}
-						// apply bonuses
-						if (symbol) {
-							if (symbol == "+") {
-								total += parseInt(bonus);
-							} else {
-								total -= parseInt(bonus);
+					
+						if (campaign) {
+							var responses = [ "**Surprise!", "**Time for an", "**Look out!", "**BOO!" ];
+							if (ips >= 3) {
+								message.reply(responses[rand(responses.length-1)] + ' Intervention:** ' + interventions[rand(6)-1]);
+								ips = 0;
 							}
-						}				
-						// calculate percentage of success
-						var max = sides * count;
-						var index = 2; // default, 26-74%
-						if (critSuccess && critFail) { // both crit success and crit fail
-							index = 7;
-						} else if (critSuccess && sides == 20) { // crit success
-							index = 6;
-						} else if (critFail && sides == 20) { // crit fail
-							index = 5;
-						} else if (total >= max * .90) { // 91-100%
-							index = 4;
-						} else if (total <= max * .10) { // 0-9%
-							index = 0;	
-						} else if (total >= max * .75) { // 75-90%
-							index = 3;
-						} else if (total <= max * .25) { // 10-25%	
-							index = 1;
+							CampaignModel.findByIdAndUpdate(campaign._id, { interventionPoints: ips });
 						}
-						message.reply(diceMessage(index, bonus, symbol, count, numbers, sides, total));
-						break;
-					case 'commands':
-						message.channel.send('I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~'); 
-						break; 
-					case 'intro':
-						message.channel.send('I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.'); 
-						break; 
-					case 'credits':
-						message.channel.send('Code by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]\nPortent Words from [https://wordcounter.net/random-word-generator]'); 
-						break; 
-				} 
-			}
-		})
+					});
+					break;
+				case 'p':
+				case 'portent':
+					var responses = [
+						"Use these words for inspiration", "Here, try these words", "Let these jog your imagination", "Look, I'm not a dictionary, but I know some helpful words"
+					];
+					var index1 = rand(3)-1;
+					var index2 = rand(3)-1;
+					var word1 = portents[index1][rand(portents[index1].length)-1];
+					var word2 = portents[index2][rand(portents[index2].length)-1];
+
+					message.reply(responses[rand(responses.length-1)] + ': "' + word1 + '" and "' + word2 + '"');
+					break;
+				case 'twene':
+					message.reply('Ah, so things are not as expected? ' + twene[rand(twene.length-1)]);
+					break;
+				case 'flip':
+					var coin = rand(2) == 2 ? "heads" : "tails";
+					message.reply('I flipped a coin for you, it was ' + coin + '.' );
+					break;
+				case 'kroll':
+					// set defaults
+					var numbers = [];
+					var total = 0;
+					var count = 1;
+					var sides = 20;
+					var symbol;
+					var bonus;
+					var critSuccess = false;
+					var critFail = false;
+					// set up dice
+					var dice = message.content.match(/(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/);
+					if (dice) {
+						count = dice[1] ? dice[1] : count;
+						sides = dice[2];
+						symbol = dice[4];
+						bonus = dice[5];
+					}
+					// handle d0 dice
+					if (sides == 0) {
+						message.reply('Look- it\'s fucking nothing!'); 
+						return;
+					}
+					// roll all dice
+					for (i = 0; i < count; i++) {
+						numbers[i] = rand(sides);
+						total += numbers[i];
+						// account for crits
+						critSuccess = critSuccess || numbers[i] == sides;
+						critFail = critFail || numbers[i] == 1;
+					}
+					// apply bonuses
+					if (symbol) {
+						if (symbol == "+") {
+							total += parseInt(bonus);
+						} else {
+							total -= parseInt(bonus);
+						}
+					}				
+					// calculate percentage of success
+					var max = sides * count;
+					var index = 2; // default, 26-74%
+					if (critSuccess && critFail) { // both crit success and crit fail
+						index = 7;
+					} else if (critSuccess && sides == 20) { // crit success
+						index = 6;
+					} else if (critFail && sides == 20) { // crit fail
+						index = 5;
+					} else if (total >= max * .90) { // 91-100%
+						index = 4;
+					} else if (total <= max * .10) { // 0-9%
+						index = 0;	
+					} else if (total >= max * .75) { // 75-90%
+						index = 3;
+					} else if (total <= max * .25) { // 10-25%	
+						index = 1;
+					}
+					message.reply(diceMessage(index, bonus, symbol, count, numbers, sides, total));
+					break;
+				case 'commands':
+					message.channel.send('I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~'); 
+					break; 
+				case 'intro':
+					message.channel.send('I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.'); 
+					break; 
+				case 'credits':
+					message.channel.send('Code by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]\nPortent Words from [https://wordcounter.net/random-word-generator]'); 
+					break; 
+			} 
+		}
+		
 	}
 }); 
 

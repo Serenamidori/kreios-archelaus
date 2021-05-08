@@ -87,7 +87,7 @@ bot.on('message', message => {
 	// heh, nice
 	if (contains(message.content.split(/ +/), '69')) { message.reply('Heh, _nice_.') }
 
-	if (message.channel.id == process.env.BOT_CHANNEL || message.channel.id == process.env.TESTING_CHANNEL) {
+	//if (message.channel.id == process.env.BOT_CHANNEL || message.channel.id == process.env.TESTING_CHANNEL) {
 		const constants = require('./messages/constants.json');
 
 		// check for user enrollment before anything else, and use this variable throughout the commands
@@ -356,7 +356,7 @@ bot.on('message', message => {
 				message.reply(responses[rand(responses.length - 1)]);
 			}	
 		} 
-	}
+	//}
 }); 
 
 // Portent word arrays (https://wordcounter.net/random-word-generator)

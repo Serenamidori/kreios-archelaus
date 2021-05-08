@@ -1,75 +1,23 @@
-var Discord = require('discord.io');
-var logger = require('winston');
-var auth = require('./auth.json'); // Configure logger settings 
-logger.remove(logger.transports.Console);
-logger.add(new logger.transports.Console, { colorize: true });
-logger.level = 'debug'; // Initialize Discord Bot
-var bot = new Discord.Client({ 
-	token: auth.token,
-	autorun: true 
+require('dotenv').config();
+var Discord = require('discord.js');
+var CampaignModel = require('./models/Campaign');
+var mongoose = require('mongoose');
+var bot = new Discord.Client();
+
+mongoose.connect('mongodb+srv://serenamidori:vs46aqp6@cluster0.6hnfq.mongodb.net/kreios-archelaus?retryWrites=true&w=majority', {
+	useNewUrlParser: true,
+	useFindAndModify: false,
+	useCreateIndex: true,
+	useUnifiedTopology: true
+	}, function (err) {
+	if (err) throw err;
+	console.log('Successfully connected to DB');
+	bot.login(process.env.TOKEN);
 });
-bot.on('ready', function (evt) { 
-	console.log('[' + bot.username + ' is now online]'); 
+
+bot.on('ready', () => {
+	console.info(`Logged in as ${bot.user.tag}`);
 });
-
-// String Arrays
-var responses = [
-	["Oh fuck, that's a ", "_Eeeesh_, it's a "], // 0-9%
-	["Good luck with a ", "Oh well, can't do much with a ", "Oof, that's a "], // 10-25%	
-	["You get a ", "It's a ", "I bestow you a "], // 26-74%
-	["Not bad, you got a ", "Oh wow, that's a ", "Nice, it's a "], // 75-90%
-	["_Yoooo_, it's a ", "Oh damn, you got a "], // 91-100%
-	["Critical fail, you rolled a natural 1 there buddy. Your total is "], // crit fail
-	["Critical Success! You rolled a natural 20! Your total is "], // crit success
-	["Incredible, a natural 20 _and_ natural 1? Hope you were rolling with advantage, buddy! Your total is "], // both crits
-];
-
-// Intervention table
-var interventions = [
-	"New Entity\n> An entity refers to any person or group of persons that are remotely autonomous, not simply specific NPCs and monsters. For inspirations, I recommend using `!npc` commands or `!portent`",
-	"Entity Positive\n> Something good happens to an entity, the specifics of which can be determined by asking questions using `!oracle`",
-	"Entity Negative\n> Something bad happens to an entity, the specifics of which can be determined by asking questions using `!oracle`",
-	"Advance Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Advancing a plot pushes an unresolved hook forward.",
-	"Regress Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Regressing a plot should help the adventure progress, just by hindering a certain goal or plot point.",
-	"Wild\n> Something unexpected! This is the option that allows for sudden twists of fate. Because a wild Intervention is so vague in what it can represent, I recommend you use `!portent` to figure out what the heck it actually means."
-];
-
-// Oracle table
-var oracle = ["No, and...", "No.", "No, but...", "Yes, but...", "Yes.", "Yes, and..."];
-
-// TWENE table
-var twene = [
-	"Let's **increase a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
-	"Let's **decrease a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
-	"Let's **add a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element now exists in the scene that you weren’t previously aware of.", 
-	"Let's **remove a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. An element that should normally exist in the scene does not exist here.", 
-	"Let's **increase a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
-	"Let's **decrease a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
-	"Let's **add a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element now exists in the scene that you weren’t previously aware of.", 
-	"Let's **remove a major element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A major element is something that is affecting the scene, and may even be in the Plot or Entity lists. An element that should normally exist in the scene does not exist here.", 
-	"Let's try a **wild positive!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is positive, but because it can be a little obscure, you can use `!portent` to help decide what happens next.", 
-	"Let's try a **wild negative!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is negative, but because it can be a little obscure, you can use `!portent` to help decide what happens next"];
-
-// NPC Attitude table
-var npcAttitude = ["They are hostile towards you.", "They are neutral towards you.", "They are friendly towards you."];
-
-// NPC Build table
-// [0] Races (common), [1] Races (uncommon), [2] Races (monster), [3] Classes, [4] Genders, [5] Color, [6] Hair length, [7] Height, [8] Weight, [9] Misc.
-var npcBuild = [
-	["human", "elf", "dwarf", "half-elf", "gnome", "halfling", "drow"],
-	["half-orc", "tiefling", "dragonborn", "kenku", "aasimar", "aarakocra", "lizardfolk", "tabaxi", "triton", "firbolg", "centaur", "satyr", "pixie", "sprite", " goliath"],
-	["goblin", "hobgoblin", "bugbear", "kobold", "yuan-ti"],
-	["wizard", "fighter", "sorcerer", "warlock", "paladin", "cleric", "barbarian", "bard", "artificer", "ranger", "druid", "monk", "rogue"],
-	["male", "female", "nonbinary"],
-	["black", "white", "brown", "orange", "red", "pink", "blue", "purple", "green", "yellow"],
-	["short hair", "long hair", "medium hair"],
-	["short", "tall", "average"],
-	["heavy", "thin", "average"],
-	["freckles", "scar", "beauty mark", "missing eye/limb", "facial hair", "glasses"]
-];
-
-// Intervention point tracker
-var interventionPoints = 0;
 
 // Generates a random number, default 1-20
 function rand (sides) {
@@ -82,6 +30,8 @@ function rand (sides) {
 
 // Formats the messages for the dice roller
 function diceMessage (index, bonus, symbol, count, numbers, sides, total) {
+	const constants = require('./messages/constants.json');
+	var responses = constants.diceRoller;
 	var response = responses[index];
 	var punctuation = index == 4 ? "!" : ".";
 
@@ -99,154 +49,169 @@ function diceMessage (index, bonus, symbol, count, numbers, sides, total) {
 	return response[rand(response.length)-1] + total + punctuation + "\n" + diceMessage;
 }
 
-// Formats a message to @ the user who sent the command
-function atUser (userId) {
-	return '<@' + userId + '> ';
-}
-
-// Checks if a string appears in an array
+// Checks if a string (or strings) appears in an array
 function contains (array, string) {
-	for (i = 0; i < array.length; i++) {
-		if (array[i] == string) {
-			return true;
+	var strings = [];
+	if (string.indexOf(' ') >= 0) {
+		strings = string.split(/ +/);
+		for (i = 0; i < array.length; i++) {
+			if (array[i].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}?=\-_`~()]/g, "") == strings[0].toLowerCase()) {
+				for (j = 1; j < strings.length; j++) {
+					i++;
+					if (i >= array.length || array[i].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}?=\-_`~()]/g, "") != strings[j].toLowerCase()) {
+						return false;
+					}
+				}
+				return true;
+			}
 		}
-	}
+	} else {
+		for (i = 0; i < array.length; i++) {
+			if (array[i].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}?=\-_`~()]/g, "") == string.toLowerCase()) {
+				return true;
+			}
+		}
+	}	
 	return false;
 }
 
-// Adds an intervention point to the score and handles when we reach 3
-function addInterventionPoint (channelId) {
-	interventionPoints++;
-	var responses = [
-		"Surprise!", "Time for an", "Look out!", "BOO!"
-	];
-	if (interventionPoints >= 3) {
-		bot.sendMessage({ to: channelId, message: '**' + responses[rand(responses.length-1)] + ' Intervention:** ' + interventions[rand(6)-1]});
-		interventionPoints = 0;
-	}
-}
+// Checks for a null or emptry string
+function isEmpty(string){
+	return (string == null || string.length === 0);
+}	
 
-function containsWord(string, word) {
-	return string.match(new RegExp("\\b" + word + "\\b")) != null;
-  }
-
-bot.on('message', function (user, userId, channelId, message, evt) { 
-	
+bot.on('message', message => { 
 	// Prevents Kreios from responding to his own messages
-	if (userId == bot.id) return;
+	if (message.author.id == bot.user.id) return;
 
 	// heh, nice
-	if (containsWord(message.toLowerCase(), '69')) { bot.sendMessage({ to: channelId, message: atUser(userId) + 'Heh, _nice_.' }); }
-		
-	// commands
-	if (message.substring(0, 1) == '!' || message.substring(0, 1) == '/') {
-		message = message.toLowerCase();
-		var parser = message.substring(0, 1);
-		var args = message.substring(1).split(/ +/);
-		var cmd = args[0]; 
-		args = args.splice(1);
-		//console.log(cmd);
-		//console.log(args);
+	if (contains(message.content.split(/ +/), '69')) { message.reply('Heh, _nice_.') }
 
-		switch(cmd) {
-			case '':
-				if (args.length != 0) {
-					bot.sendMessage({ to: channelId, message: atUser(userId) + 'Sorry, didn\'t quite get that. Make sure not to add a space between the "' + parser + '" and your command.' }); 
-				}
-				break;
-			case 'npc':
-			case 'n':
-				if (args.length == 0) {
-					bot.sendMessage({ to: channelId, message: atUser(userId) + 'Please specify what you\'d like to know about this NPC.\n**attitude (a)** - Gives the demeanor of the NPC towards you.\n**build (b)** - Creates a random NPC description to work with.' }); 
-				}
-				// build
-				if (contains(args, 'build') || contains(args, 'b')) {
-					var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
-					
-					var raceArray = npcBuild[0];
-					if (contains(args, 'uncommon') || contains(args, 'u')) {
-						raceArray = raceArray.concat(npcBuild[1]);
-					} if (contains(args, 'rare') || contains(args, 'r')) {
-						raceArray = raceArray.concat(npcBuild[2]);
-					} if (contains(args, 'monster') || contains(args, 'm')) {
-						raceArray = npcBuild[2];
+	//if (message.channel.id == process.env.BOT_CHANNEL || message.channel.id == process.env.TESTING_CHANNEL) {
+		const constants = require('./messages/constants.json');
+
+		// check for user enrollment before anything else, and use this variable throughout the commands
+		if (message.content.substring(0, 1) == '!') {
+			var args = message.content.substring(1).split(/ +/);
+			var cmd = args[0]; 
+			args = args.splice(1);
+
+			switch(cmd) {
+				case '':
+					if (args.length != 0) {
+						message.reply(constants.general.noCommand);
 					}
-					npc += "\n> Race: " + raceArray[rand(raceArray.length)-1];
-
-					if (contains(args, 'class') || contains(args, 'c')) {
-						npc += "\n> Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
-					}  
-					//check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
-					npc += "\n> Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
-						"\n> Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-						"\n> Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
-						"\n> Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
-						"\n> Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
-						"\n> Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
-						"\n> Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
-
-					// TODO: Make this a helper method instead, and take in multiple arguments without issue
-					bot.sendMessage({ to: channelId, message: npc});
-				}
-				// attitude
-				if (contains(args, 'attitude') || contains(args, 'a')) {
-					bot.sendMessage({ to: channelId, message: atUser(userId) + npcAttitude[rand(3)-1]});
-				}
-				break;
-			case 'oracle':
-			case 'o':
-				var ips = 0;
-				var roll = rand(6);
-				if (roll == 6) {
-					ips++;
-				}
-				// likeliness/unlikeliness
-				var advantage = contains(args, 'likely') || contains(args, 'l');
-				var disadvantage = contains(args, 'unlikely') || contains(args, 'u');
-				if (advantage && disadvantage) {
-					bot.sendMessage({ to: channelId, message: atUser(userId) + 'You can\'t roll both advantage _and_ disadvantage, silly. Pick one and try again.' });
 					break;
-				} else if (advantage || disadvantage) {
-					var roll2 = rand(6);
-					if (roll2 == 6) {
-						ips++;
+				case 'setCampaign':
+				case 'setcampaign':
+				case 'set_campaign':
+					CampaignModel.findOne({ channelId: message.channel.id, }).then(campaign => {
+						if (campaign) {
+							message.reply('this channel is already set as a campaign, you can start playing whenever you like.');
+						} else {
+							new CampaignModel({ channelId: message.channel.id, interventionPoints: 0 }).save().then(campaign => {
+								message.reply('this channel is now a campaign, I\'ll keep track of your Intervention Points while you play here.');
+							});
+						}
+					});
+					break;
+				case 'npc':
+					if (args.length == 0) {
+						message.reply('be sure to specify what you\'d like to know about this NPC.\n**attitude** - Gives the demeanor of the NPC towards you.\n**build [uncommon/rare/monster] [class]** - Creates a random NPC description to work with.'); 
 					}
-					if (advantage) {
-						roll = Math.max(roll, roll2);
-					} else {
-						roll = Math.min(roll, roll2);
-					}
-				}
-				bot.sendMessage({ to: channelId, message: atUser(userId) + oracle[roll-1] });
-				// handle intervention points after all rolls
-				for (i = 0; i < ips; i++) {
-					addInterventionPoint(channelId);
-				}
-				break;
-			case 'portent':
-			case 'p':
-				var responses = [
-					"Use these words for inspiration", "Here, try these words", "Let these jog your imagination", "Look, I'm not a dictionary, but I know some helpful words"
-				];
-				var index1 = rand(3)-1;
-				var index2 = rand(3)-1;
-				var word1 = portents[index1][rand(portents[index1].length)-1];
-				var word2 = portents[index2][rand(portents[index2].length)-1];
+					// build
+					if (args[0] == 'build' || args[0] == 'b') {
+						const npcBuild = constants.npcBuild;
+						var npc = "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
+						
+						var raceArray = npcBuild[0];
+						if (contains(args, 'uncommon') || contains(args, 'u')) {
+							raceArray = raceArray.concat(npcBuild[1]);
+						} if (contains(args, 'rare') || contains(args, 'r')) {
+							raceArray = raceArray.concat(npcBuild[2]);
+						} if (contains(args, 'monster') || contains(args, 'm')) {
+							raceArray = npcBuild[2];
+						}
+						npc += "```\n Race: " + raceArray[rand(raceArray.length)-1];
 
-				bot.sendMessage({ to: channelId, message: atUser(userId) + responses[rand(responses.length-1)] + ': "' + word1 + '" and "' + word2 + '"'});
-				break;
-			case 'twene':
-			case 't':
-				bot.sendMessage({ to: channelId, message: atUser(userId) + 'Ah, so things are not as expected? ' + twene[rand(twene.length-1)]});
-				break;
-			case 'flip':
-			case 'f':
-				var coin = rand(2) == 2 ? "heads" : "tails";
-				bot.sendMessage({ to: channelId, message: atUser(userId) + 'I flipped a coin for you, it was ' + coin + '.' });
-				break;
-			case 'roll':
-			case 'r':
-				if (parser != "!") { // quick fix for Avrae
+						if (contains(args, 'class') || contains(args, 'c')) {
+							npc += "\n Class: " + npcBuild[3][rand(npcBuild[3].length)-1];
+						}  
+						//check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
+						npc += "\n Gender: " + npcBuild[4][rand(npcBuild[4].length)-1] + 
+							"\n Hair Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+							"\n Hair Length: " + npcBuild[6][rand(npcBuild[6].length)-1] + 
+							"\n Eye Color: " + npcBuild[5][rand(npcBuild[5].length)-1] + 
+							"\n Height: " + npcBuild[7][rand(npcBuild[7].length)-1] + 
+							"\n Weight: " + npcBuild[8][rand(npcBuild[8].length)-1] + 
+							"\n Misc. Trait: " + npcBuild[9][rand(npcBuild[9].length)-1];
+
+						npc = npc + '```';
+						message.reply(npc);
+					}
+					// attitude
+					if (args[0] == 'attitude'|| args[0] == 'a') {
+						message.reply(constants.npcAttitude[rand(3)-1]);
+					}
+					break;
+				case 'o':
+				case 'oracle':
+					CampaignModel.findOne({ channelId: message.channel.id, }).then(campaign => {
+						const oracle = constants.oracle;
+						const interventions = constants.interventions;
+
+						var ips = campaign ? campaign.interventionPoints : 0;
+						var roll = rand(6);
+						if (roll == 6) {
+							ips++;
+						}
+
+						// likeliness/unlikeliness
+						var likely = ['likely', 'l', 'advantage', 'adv', 'a']
+						var unlikely = ['unlikely', 'u', 'disadvantage', 'dis', 'd']
+						var advantage = contains(likely, args[0]);
+						var disadvantage = contains(unlikely, args[0]);
+						if (advantage || disadvantage) {
+							var roll2 = rand(6);
+							if (roll2 == 6) {
+								ips++;
+							}
+							if (advantage) {
+								roll = Math.max(roll, roll2);
+							} else {
+								roll = Math.min(roll, roll2);
+							}
+						}
+						message.reply(oracle[roll]);
+					
+						if (campaign) {
+							var responses = [ "**Surprise!", "**Time for an", "**Look out!", "**BOO!" ];
+							if (ips >= 3) {
+								message.reply(responses[rand(responses.length-1)] + ' Intervention:** ' + interventions[rand(6)-1]);
+								ips = 0;
+							}
+							CampaignModel.findByIdAndUpdate(campaign._id, { interventionPoints: ips }).then(() => {
+							});
+						}
+					});
+					break;
+				case 'p':
+				case 'portent':
+					var index1 = rand(3)-1;
+					var index2 = rand(3)-1;
+					var word1 = portents[index1][rand(portents[index1].length)-1];
+					var word2 = portents[index2][rand(portents[index2].length)-1];
+
+					message.reply(constants.portents[rand(constants.portents.length-1)] + ': "' + word1 + '" and "' + word2 + '"');
+					break;
+				case 'twene':
+					message.reply('Ah, so things are not as expected? ' + constants.twene[rand(constants.twene.length-1)]);
+					break;
+				case 'flip':
+					var coin = rand(2) == 2 ? "heads" : "tails";
+					message.reply('I flipped a coin for you, it was ' + coin + '.' );
+					break;
+				case 'kroll':
 					// set defaults
 					var numbers = [];
 					var total = 0;
@@ -257,7 +222,7 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 					var critSuccess = false;
 					var critFail = false;
 					// set up dice
-					var dice = message.match(/(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/);
+					var dice = message.content.match(/(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/);
 					if (dice) {
 						count = dice[1] ? dice[1] : count;
 						sides = dice[2];
@@ -266,7 +231,7 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 					}
 					// handle d0 dice
 					if (sides == 0) {
-						bot.sendMessage({ to: channelId, message: atUser(userId) + 'Look- it\'s fucking nothing!' }); 
+						message.reply('Look- it\'s fucking nothing!'); 
 						return;
 					}
 					// roll all dice
@@ -303,103 +268,96 @@ bot.on('message', function (user, userId, channelId, message, evt) {
 					} else if (total <= max * .25) { // 10-25%	
 						index = 1;
 					}
-					bot.sendMessage({ to: channelId, message: atUser(userId) + diceMessage(index, bonus, symbol, count, numbers, sides, total) });
-					// handle nice
-					if (total == 69) {
-						bot.sendMessage({ to: channelId, message: 'Heh, _nice_.' }); 
-					}
-				}
-				break;
-			case 'help':
-			case 'h':
-				if (parser != "!") { // quick fix for Avrae
-					bot.sendMessage({ to: channelId, message: 'I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~' }); 
-				}
-				break; 
-			case 'intro':
-			case 'i':
-				bot.sendMessage({ to: channelId, message: 'I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.' }); 
-				break; 
-			case 'credits':
-			case 'c':
-				bot.sendMessage({ to: channelId, message: 'Coding by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]\nPortent Words from [https://wordcounter.net/random-word-generator]' }); 
-				break; 
-		} 
-	} 
-	//addressing the DM
-	else {
-		message = message.toLowerCase();
-		if (containsWord(message, 'dm') ||containsWord(message, 'dungeon master') || containsWord(message, 'kreios') || containsWord(message, 'archelaus')|| message.includes(bot.id)){
-			// calling him daddy
-			if (message.includes('uwu')) {
-				bot.sendMessage({ to: channelId, message: atUser(userId) + " uwu" });
-				return;
-			}
-			// calling him daddy
-			if (containsWord(message, 'daddy')) {
-				var responses = [
-					"**No.** None of that.", "*Absolutely not*."
-				];
-				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-				return;
-			}
-			// compliments
-			if (containsWord(message, 'cute') || containsWord(message, 'adorable') || containsWord(message, 'handsome') || containsWord(message, 'hot') || containsWord(message, 'sexy')) {
-				var responses = [
-					"Aww~ you flatter me.", "You're making me blush~.", "Why thank you~"
-				];
-				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-				return;
-			}
-			// fight me
-			if (containsWord(message, 'fight me')) {
-				var responses = [
-					"Alright, I use my Sacred DM Dragon's Flame. It instantly takes out all your remaining HP and kills you super dead. Want to try that again?", "Meet me in the Denny's parking lot.", "You _really_ want to fight the Dungeon Master? _Pff_."
-				];
-				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-				return;
-			}
-			// fuck you / fuck off
-			if (containsWord(message, 'fuck you') || containsWord(message, 'fuck off')) {
-				var responses = [
-					"_Language._ You kiss your mother with that mouth?", "Is that an invitation? ...oh, no that's you trying to be clever.", "No thanks~", "You roll a natural 1 and die, roll a new character."
-				];
-				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-				return;
-			}
-			// fuck me
-			if (containsWord(message, 'fuck me')) {
-				var responses = [
-					"My, how forward!", "Oh, I'm sure that will go well for you.", "What, like killing your character? I could do that~"
-				];
-				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-				return;
-			}
-			// thank you
-			if (containsWord(message, 'thank you') || containsWord(message, 'thank') || containsWord(message, 'thanks')) {
-				var responses = [
-					"You're most welcome.", "But of course.", "Mhm... what did I do?"
-				];
-				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-				return;
-			}
-			//if it's Lore
-			if (userId == 108393182563213312) {
-				var responses = [
-					"Why hello " + atUser(userId) + "~", "_Mmmmyes " + atUser(userId) + "~?_", "What may I do for you " + atUser(userId) + "?"
-				];
-				bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-				return;
-			}
-			//default responses
-			var responses = [
-				"Yes?", "What do you want?", "May I help you?", "Yes, I was paying attention, what?", "_Mmmyes?_", "You rang?", "That's my name, don't wear it out!", "You have my attention~", "I see you, " + atUser(userId), ""
-			];
-			bot.sendMessage({ to: channelId, message: responses[rand(responses.length - 1)] });
-		}
-	} 
-}); 
+					message.reply(diceMessage(index, bonus, symbol, count, numbers, sides, total));
+					break;
+				// TODO: Update the Commands and Intro, if needed
+				// case 'commands':
+				// 	message.channel.send('I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~'); 
+				// 	break; 
+				// case 'intro':
+				// 	message.channel.send('I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.'); 
+				// 	break; 
+				case 'credits':
+					message.channel.send('Code by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]\nPortent Words from [https://wordcounter.net/random-word-generator]'); 
+					break; 
+			} 
+		} else {
+			//TODO everything below needs to be formatted to the new code
+			// all of these need to only happen if he's @'d
 
+			if (message.mentions.has(bot.user)) {
+				var words = message.content.split(/ +/);
+
+				// saying uwu
+				if (contains(words, 'uwu')) {
+					message.reply('uwu');
+					return;
+				}
+				// calling him daddy
+				if (contains(words, 'daddy')) {
+					var responses = [
+						"**no.** None of that.", "*absolutely not*."
+					];
+					message.reply(responses[rand(responses.length - 1)]);
+					return;
+				}
+				// compliments
+				if (contains(words, 'cute') || contains(words, 'adorable') || contains(words, 'handsome') || contains(words, 'hot') || contains(words, 'sexy')) {
+					var responses = [
+						"aww, you flatter me.", "you're making me blush.", "why thank you~"
+					];
+					message.reply(responses[rand(responses.length - 1)]);
+					return;
+				}
+				// fight me
+				if (contains(words, 'fight me')) {
+					var responses = [
+						"alright, I use my Sacred DM Dragon's Flame. It instantly takes out all your remaining HP and kills you super dead. Want to try that again?", "meet me in the Denny's parking lot.", "you _really_ want to fight the Dungeon Master? _Pff_."
+					];
+					message.reply(responses[rand(responses.length - 1)]);
+					return;
+				}
+				// fuck you / fuck off
+				if (contains(words, 'fuck you') || contains(words, 'fuck off')) {
+					var responses = [
+						"_language._ You kiss your mother with that mouth?", "is that an invitation? Oh, no that's you trying to be clever.", "no thank you.", "you roll a natural 1 and die, roll a new character."
+					];
+					message.reply(responses[rand(responses.length - 1)]);
+					return;
+				}
+				// fuck me
+				if (contains(words, 'fuck me')) {
+					var responses = [
+						"my, how forward!", "oh, I'm sure that will go well for you.", "what, like killing your character? I could do that~"
+					];
+					message.reply(responses[rand(responses.length - 1)]);
+					return;
+				}
+				// thank you
+				if (contains(words, 'thank you') || contains(words, 'thank') || contains(words, 'thanks')) {
+					var responses = [
+						"you're most welcome.", "but of course.", "mhm... what did I do?"
+					];
+					message.reply(responses[rand(responses.length - 1)]);
+					return;
+				}
+				//if it's Lore, Jane, or Jay
+				if (message.author.id == 108393182563213312 || message.author.id == 146434211912351744 || message.author.id == 302942448714383360) {
+					var responses = [
+						"why hello there~", "_mmmmyes~?_", "what may I do for you~?"
+					];
+					message.reply(responses[rand(responses.length - 1)]);
+					return;
+				}
+				//default responses
+				var responses = [
+					"yes?", "what do you want?", "may I help you?", "yes, I was paying attention, what?", "_mhmm?_", "you rang?", "that's my name, don't wear it out!", "you have my attention~", "I see you", "got a question for me?"
+				];
+				message.reply(responses[rand(responses.length - 1)]);
+			}	
+		} 
+	//}
+}); 
 
 // Portent word arrays (https://wordcounter.net/random-word-generator)
 // verbs [0], nouns [1], adjectives [2]

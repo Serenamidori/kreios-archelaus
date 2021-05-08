@@ -97,21 +97,16 @@
         "vcSuccess": "successfully created a voice channel for Campaign #", 
         "timeout": "you took a little too long to respond, I won't make any changes for now."
     }, 
-    "diceRoller": {
-        "normal": [
-            ["Oh fuck, that's a ", "_Eeeesh_, it's a "],
-            ["Good luck with a ", "Oh well, can't do much with a ", "Oof, that's a "],	
-            ["You get a ", "It's a ", "I bestow you a "],
-            ["Not bad, you got a ", "Oh wow, that's a ", "Nice, it's a "],
-            ["_Yoooo_, it's a ", "Oh damn, you got a "],
-            ["Critical fail, you rolled a natural 1 there buddy. Your total is "],
-            ["Critical Success! You rolled a natural 20! Your total is "],
-	        ["Incredible, a natural 20 _and_ natural 1? Hope you were rolling with advantage, buddy! Your total is "]
-        ],
-        "kind": [],
-        "flirty": [],
-        "mean": []
-    }, 
+    "diceRoller": [
+        ["oh fuck, that's a ", "_eeeesh_, it's a "],
+        ["good luck with a ", "oh well, can't do much with a ", "oof, that's a "],	
+        ["you get a ", "it's a ", "I bestow you a "],
+        ["not bad, you got a ", "oh wow, that's a ", "nice, it's a "],
+        ["_yoooo_, it's a ", "oh damn, you got a "],
+        ["Critical Fail! You rolled a natural 1, hope that roll wasn't important~ Your total is "],
+        ["Critical Success! You rolled a natural 20, lucky you! Your total is "],
+        ["incredible, a natural 20 _and_ natural 1? Hope you were rolling with advantage! Your total is "]
+    ],
     "twene": [
         "Let's **increase a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.", 
         "Let's **decrease a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element decreases in scale or importance, meaning there is less of none of it in the scene.", 
@@ -135,5 +130,16 @@
         ["short", "tall", "average"],
         ["heavy", "thin", "average"],
         ["freckles", "scar", "beauty mark", "missing eye/limb", "facial hair", "glasses"]
+    ],
+    "interventions": [
+        "New Entity\n> An entity refers to any person or group of persons that are remotely autonomous, not simply specific NPCs and monsters. For inspirations, I recommend using `!npc` commands or `!portent`",
+        "Entity Positive\n> Something good happens to an entity, the specifics of which can be determined by asking questions using `!oracle`",
+        "Entity Negative\n> Something bad happens to an entity, the specifics of which can be determined by asking questions using `!oracle`",
+        "Advance Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Advancing a plot pushes an unresolved hook forward.",
+        "Regress Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Regressing a plot should help the adventure progress, just by hindering a certain goal or plot point.",
+        "Wild\n> Something unexpected! This is the option that allows for sudden twists of fate. Because a wild Intervention is so vague in what it can represent, I recommend you use `!portent` to figure out what the heck it actually means."
+    ],
+    "portents": [
+        "Use these words for inspiration", "Here, try these words", "Let these jog your imagination", "Look, I'm not a dictionary, but I know some helpful words"
     ]
 }

@@ -78,7 +78,26 @@ function contains (array, string) {
 // Checks for a null or emptry string
 function isEmpty(string){
 	return (string == null || string.length === 0);
-}	
+}
+
+// Give the int value of a difficulty rating
+function difficultyToRoll(difficulty){
+	switch(difficulty) {
+		case 've':
+			return 0;
+		case 'e':
+			return 1;
+		case 'm':
+			return 2;
+		case 'h':
+			return 3;
+		case 'vh':
+			return 4;
+		case 'ni':
+			return 5;
+	}
+}
+
 
 bot.on('message', message => { 
 	// Prevents Kreios from responding to his own messages
@@ -100,6 +119,147 @@ bot.on('message', message => {
 				case '':
 					if (args.length != 0) {
 						message.reply(constants.general.noCommand);
+					}
+					break;
+				case 'exp':
+				case 'xp':
+					if (args.length <= 1) {
+						message.reply('tell me the __difficulty rating__ of your success and your __character level__, and I shall give you your exp.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!exp m 1` or `!xp ni 5`');
+					} else {
+						var expTable = [
+							[10, 25, 50, 75, 100, 200],
+							[25, 50, 100, 150, 200, 400],
+							[50, 75, 150, 225, 400, 500],
+							[75, 125, 250, 375, 500, 110],
+							[125, 250, 500, 750, 1100, 1400],
+							[250, 300, 600, 900, 1400, 1700],
+							[300, 350, 750, 1100, 1700, 2100],
+							[350, 450, 900, 1400, 2100, 2400],
+							[450, 550, 1100, 1600, 2400, 2800],
+							[550, 600, 1200, 1900, 2800, 3600]
+						]
+
+						var difficulty = "";
+						var level = 0;
+						try {
+							if (args.length >= 3) {
+								level = parseInt(args[2]);
+								if (args[0] == "very") {
+									difficulty = args[1] == "easy" ? "ve" : "vh"
+								} else if (args[0] == "nearly") {
+									difficulty = "ni";
+								}
+							} else {
+								level = parseInt(args[1]);
+								if (args[0].length > 2) {
+									if (args[0] == "impossible") {
+										difficulty = "ni"
+									} else if (args[0] == "easy") {
+										difficulty = "e"
+									} else if (args[0] == "medium") {
+										difficulty = "m"
+									} else if (args[0] == "hard") {
+										difficulty = "h"
+									}
+								}
+							}
+						} catch (err) {
+							message.reply('tell me the __difficulty rating__ of your success and your __character level__, and I shall give you your exp.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!exp m 1` or `!xp ni 5`');
+							break;
+						}
+						 
+						if (isEmpty(difficulty)) {
+							message.reply('didn\'t quite understand what your __difficulty rating__ is. Try one of the following options:\n**ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)');
+							break;
+						}
+						
+						if (level <= 0) {
+							message.reply('make sure you\'re giving me a valid character level when begging for XP.');
+							break;
+						}
+
+						var roll = difficultyToRoll(difficulty);
+						var exp = expTable[level - 1][roll]
+						message.reply('each player who succeeded should receive ' + exp + ' XP.');
+					}
+					break;
+				case 'dc':
+					if (args.length == 0) {
+						message.reply('tell me the difficulty rating of your situation, and I\'ll give you a DC for this check.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!dc m` or `!dc ni`');
+					} else {
+
+						var difficulty = "";
+						try {
+							if (args.length >= 2) {
+								if (args[0] == "very") {
+									difficulty = args[1] == "easy" ? "ve" : "vh"
+								} else if (args[0] == "nearly") {
+									difficulty = "ni";
+								}
+							} else {
+								if (args[0].length > 2) {
+									if (args[0] == "impossible") {
+										difficulty = "ni"
+									} else if (args[0] == "easy") {
+										difficulty = "e"
+									} else if (args[0] == "medium") {
+										difficulty = "m"
+									} else if (args[0] == "hard") {
+										difficulty = "h"
+									}
+								}
+							}
+						} catch (err) {
+							message.reply('tell me the __difficulty rating__ of your success and your __character level__, and I shall give you your exp.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!exp m 1` or `!xp ni 5`');
+							break;
+						}
+
+						if (isEmpty(difficulty)) {
+							message.reply('didn\'t quite understand what your __difficulty rating__ is. Try one of the following options:\n**ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)');
+							break;
+						}
+
+						var roll = difficultyToRoll(difficulty);
+						var dc = (roll * 5) + rand(5);
+						message.reply('the DC to beat for this check is ' + dc + '.');
+					}
+					break;
+				case 'difficulty':
+				case 'd':
+					if (args.length == 0) {
+						message.reply('be sure to tell me how difficult _you_ think the situation is,\n**trivial (t)** - Not a challenge at all.\n**average (a)** - Some amount of challenge.\n**uncommon (u)** - More challenging than normal.\n**dire (d)** - Possibly more of a challenge than you can handle.');
+					} else {
+						var masterTable = ['Very Easy', 'Easy', 'Medium', 'Hard', 'Very Hard', 'Nearly Impossible'];
+						var guess = "";	
+						var rollTable = [];
+						
+						switch(args[0]) {
+							case 't':
+							case 'trivial':
+								guess = "trivial";
+								rollTable = ['0', '0', '1', '1', '1', '2']
+								break;
+							case 'a':
+							case 'average':
+								guess = "average";
+								rollTable = ['1', '1', '2', '2', '3', '3']
+								break;
+							case 'u':
+							case 'uncommon':
+								guess = "uncommon";
+								rollTable = ['1', '2', '2', '3', '3', '3']
+								break;
+							case 'd':
+							case 'dire':
+								guess = "dire";
+								rollTable = ['3', '3', '3', '4', '4', '5']
+								break;
+						}
+
+						var roll = rollTable[rand(6)-1];
+						var type = masterTable[roll];
+
+						message.reply('for this ' + guess + ' situation, the difficulty is **' + type + '**.');
 					}
 					break;
 				case 'setCampaign':

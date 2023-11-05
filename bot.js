@@ -80,25 +80,6 @@ function isEmpty(string){
 	return (string == null || string.length === 0);
 }
 
-// Give the int value of a difficulty rating
-function difficultyToRoll(difficulty){
-	switch(difficulty) {
-		case 've':
-			return 0;
-		case 'e':
-			return 1;
-		case 'm':
-			return 2;
-		case 'h':
-			return 3;
-		case 'vh':
-			return 4;
-		case 'ni':
-			return 5;
-	}
-}
-
-
 bot.on('message', message => { 
 	// Prevents Kreios from responding to his own messages
 	if (message.author.id == bot.user.id) return;
@@ -184,42 +165,17 @@ bot.on('message', message => {
 					}
 					break;
 				case 'dc':
-					if (args.length == 0) {
+					if (args.length == 0 || args[0].length > 2) {
 						message.reply('tell me the difficulty rating of your situation, and I\'ll give you a DC for this check.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!dc m` or `!dc ni`');
 					} else {
+						var difficulty = args[0];
+						var difficulties = ['ve', 'e', 'm', 'h', 'vh', 'ni']
 
-						var difficulty = "";
-						try {
-							if (args.length >= 2) {
-								if (args[0] == "very") {
-									difficulty = args[1] == "easy" ? "ve" : "vh"
-								} else if (args[0] == "nearly") {
-									difficulty = "ni";
-								}
-							} else {
-								if (args[0].length > 2) {
-									if (args[0] == "impossible") {
-										difficulty = "ni"
-									} else if (args[0] == "easy") {
-										difficulty = "e"
-									} else if (args[0] == "medium") {
-										difficulty = "m"
-									} else if (args[0] == "hard") {
-										difficulty = "h"
-									}
-								}
-							}
-						} catch (err) {
-							message.reply('tell me the __difficulty rating__ of your success and your __character level__, and I shall give you your exp.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!exp m 1` or `!xp ni 5`');
-							break;
-						}
-
-						if (isEmpty(difficulty)) {
+						if ((!difficulties.includes(difficulty, 0))) {
 							message.reply('didn\'t quite understand what your __difficulty rating__ is. Try one of the following options:\n**ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)');
 							break;
 						}
-
-						var roll = difficultyToRoll(difficulty);
+						var roll = difficultyToRoll(difficulties.indexOf(difficulty));
 						var dc = (roll * 5) + rand(5);
 						message.reply('the DC to beat for this check is ' + dc + '.');
 					}

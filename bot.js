@@ -297,22 +297,24 @@ bot.on('message', message => {
 						}
 
 						// likeliness/unlikeliness
-						var arg = args[0] ? args[0] : "";
-						var likely = ['likely', 'l', 'advantage', 'adv', 'a']
-						var unlikely = ['unlikely', 'u', 'disadvantage', 'dis', 'd']
-						var advantage = contains(likely, arg);
-						var disadvantage = contains(unlikely, arg);
-						if (advantage || disadvantage) {
-							var roll2 = rand(6);
-							if (roll2 == 6) {
-								ips++;
-							}
-							if (advantage) {
-								roll = Math.max(roll, roll2);
-							} else {
-								roll = Math.min(roll, roll2);
+						if (args[0] != null) {
+							var likely = ['likely', 'l', 'advantage', 'adv', 'a']
+							var unlikely = ['unlikely', 'u', 'disadvantage', 'dis', 'd']
+							var advantage = contains(likely, arg);
+							var disadvantage = contains(unlikely, arg);
+							if (advantage || disadvantage) {
+								var roll2 = rand(6);
+								if (roll2 == 6) {
+									ips++;
+								}
+								if (advantage) {
+									roll = Math.max(roll, roll2);
+								} else {
+									roll = Math.min(roll, roll2);
+								}
 							}
 						}
+					
 						message.reply(oracle[roll]);
 					
 						if (campaign) {

@@ -287,7 +287,6 @@ bot.on('message', message => {
 				case 'o':
 				case 'oracle':
 					CampaignModel.findOne({ channelId: message.channel.id, }).then(campaign => {
-						console.log(campaign)
 						const oracle = constants.oracle;
 						const interventions = constants.interventions;
 

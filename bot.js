@@ -50,7 +50,7 @@ function diceMessage (index, bonus, symbol, count, numbers, sides, total) {
 }
 
 // Checks if a string (or strings) appears in an array
-function contains (array, string) {
+function contains(array, string) {
 	var strings = [];
 	if (string.indexOf(' ') >= 0) {
 		strings = string.split(/ +/);
@@ -80,24 +80,13 @@ function isEmpty(string){
 	return (string == null || string.length === 0);
 }
 
-// Give the int value of a difficulty rating
-function difficultyToRoll(difficulty){
-	switch(difficulty) {
-		case 've':
-			return 0;
-		case 'e':
-			return 1;
-		case 'm':
-			return 2;
-		case 'h':
-			return 3;
-		case 'vh':
-			return 4;
-		case 'ni':
-			return 5;
-	}
-}
+var difficultiesNames = ['very easy', 'easy', 'medium', 'hard', 'very hard', 'nearly impossible'];
+var difficultiesCodes = ['ve', 'e', 'm', 'h', 'vh', 'ni']
 
+function calcDC(difficulty, isCode){
+	var roll = isCode ? difficultiesCodes.indexOf(difficulty) : difficultiesNames.indexOf(difficulty);
+	return (roll * 5) + rand(5);		
+}
 
 bot.on('message', message => { 
 	// Prevents Kreios from responding to his own messages
@@ -187,49 +176,32 @@ bot.on('message', message => {
 					if (args.length == 0) {
 						message.reply('tell me the difficulty rating of your situation, and I\'ll give you a DC for this check.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!dc m` or `!dc ni`');
 					} else {
-
+						var exists = false;
+						var isCode = true;
 						var difficulty = "";
-						try {
-							if (args.length >= 2) {
-								if (args[0] == "very") {
-									difficulty = args[1] == "easy" ? "ve" : "vh"
-								} else if (args[0] == "nearly") {
-									difficulty = "ni";
-								}
-							} else {
-								if (args[0].length > 2) {
-									if (args[0] == "impossible") {
-										difficulty = "ni"
-									} else if (args[0] == "easy") {
-										difficulty = "e"
-									} else if (args[0] == "medium") {
-										difficulty = "m"
-									} else if (args[0] == "hard") {
-										difficulty = "h"
-									}
-								}
-							}
-						} catch (err) {
-							message.reply('tell me the __difficulty rating__ of your success and your __character level__, and I shall give you your exp.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!exp m 1` or `!xp ni 5`');
-							break;
+
+						if (args[0].length == 2 || args[0].length == 1) { // is a code
+							difficulty = args[0];
+							exists = difficultiesCodes.includes(difficulty, 0)
+						} else { // is a string
+							difficulty = args.join(' ');
+							exists = difficultiesNames.includes(difficulty, 0)
+							isCode = false;
 						}
 
-						if (isEmpty(difficulty)) {
+						if (!exists) {
 							message.reply('didn\'t quite understand what your __difficulty rating__ is. Try one of the following options:\n**ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)');
-							break;
+						} else {
+							message.reply('you must succeed on a DC ' + calcDC(difficulty, isCode) + ' for this check.');
 						}
-
-						var roll = difficultyToRoll(difficulty);
-						var dc = (roll * 5) + rand(5);
-						message.reply('the DC to beat for this check is ' + dc + '.');
 					}
 					break;
 				case 'difficulty':
+				case 'diff':
 				case 'd':
 					if (args.length == 0) {
 						message.reply('be sure to tell me how difficult _you_ think the situation is,\n**trivial (t)** - Not a challenge at all.\n**average (a)** - Some amount of challenge.\n**uncommon (u)** - More challenging than normal.\n**dire (d)** - Possibly more of a challenge than you can handle.');
 					} else {
-						var masterTable = ['Very Easy', 'Easy', 'Medium', 'Hard', 'Very Hard', 'Nearly Impossible'];
 						var guess = "";	
 						var rollTable = [];
 						
@@ -257,9 +229,7 @@ bot.on('message', message => {
 						}
 
 						var roll = rollTable[rand(6)-1];
-						var type = masterTable[roll];
-
-						message.reply('for this ' + guess + ' situation, the difficulty is **' + type + '**.');
+						message.reply('for this ' + guess + ' situation the difficulty is **' + difficultiesNames[roll] + '** (DC ' + calcDC(difficultiesCodes[roll], true) +').');
 					}
 					break;
 				case 'setCampaign':
@@ -327,21 +297,24 @@ bot.on('message', message => {
 						}
 
 						// likeliness/unlikeliness
-						var likely = ['likely', 'l', 'advantage', 'adv', 'a']
-						var unlikely = ['unlikely', 'u', 'disadvantage', 'dis', 'd']
-						var advantage = contains(likely, args[0]);
-						var disadvantage = contains(unlikely, args[0]);
-						if (advantage || disadvantage) {
-							var roll2 = rand(6);
-							if (roll2 == 6) {
-								ips++;
-							}
-							if (advantage) {
-								roll = Math.max(roll, roll2);
-							} else {
-								roll = Math.min(roll, roll2);
+						if (args[0] != null) {
+							var likely = ['likely', 'l', 'advantage', 'adv', 'a']
+							var unlikely = ['unlikely', 'u', 'disadvantage', 'dis', 'd']
+							var advantage = contains(likely, arg);
+							var disadvantage = contains(unlikely, arg);
+							if (advantage || disadvantage) {
+								var roll2 = rand(6);
+								if (roll2 == 6) {
+									ips++;
+								}
+								if (advantage) {
+									roll = Math.max(roll, roll2);
+								} else {
+									roll = Math.min(roll, roll2);
+								}
 							}
 						}
+					
 						message.reply(oracle[roll]);
 					
 						if (campaign) {
@@ -354,6 +327,11 @@ bot.on('message', message => {
 							});
 						}
 					});
+					break;
+				case 'intervention':
+					const interventions = constants.interventions;
+					var responses = [ "**Surprise!", "**Time for an", "**Look out!", "**BOO!" ];
+					message.reply(responses[rand(responses.length-1)] + ' Intervention:** ' + interventions[rand(6)-1]);
 					break;
 				case 'p':
 				case 'portent':

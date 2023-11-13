@@ -300,8 +300,8 @@ bot.on('message', message => {
 						if (args[0] != null) {
 							var likely = ['likely', 'l', 'advantage', 'adv', 'a']
 							var unlikely = ['unlikely', 'u', 'disadvantage', 'dis', 'd']
-							var advantage = contains(likely, arg);
-							var disadvantage = contains(unlikely, arg);
+							var advantage = contains(likely, args[0]);
+							var disadvantage = contains(unlikely, args[0]);
 							if (advantage || disadvantage) {
 								var roll2 = rand(6);
 								if (roll2 == 6) {

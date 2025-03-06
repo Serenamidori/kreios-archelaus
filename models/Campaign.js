@@ -1,8 +1,9 @@
-const { Schema, model } = require('mongoose');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const Campaign = Schema({
+const campaignSchema = new Schema({
     channelId: String,
     interventionPoints: Number
 });
 
-module.exports = model('Campaign', Campaign);
+module.exports = mongoose.model('Campaign', campaignSchema);

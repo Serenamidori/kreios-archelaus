@@ -1,6 +1,7 @@
+const constants = require('../data/constants.json');
+
 // Formats the messages for the dice roller
 function diceMessage (index, bonus, symbol, count, numbers, sides, total) {
-	const constants = require('../messages/constants.json');
 	var responses = constants.diceRoller;
 	var response = responses[index];
 	var punctuation = index == 4 ? "!" : ".";

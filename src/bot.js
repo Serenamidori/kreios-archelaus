@@ -3,10 +3,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
 
-const utils = require("./utils");
-const api = require("./api");
-const constants = require("./data/constants.json");
-
 const bot = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -15,7 +11,6 @@ const bot = new Client({
   ],
 });
 
-// Commands
 bot.commands = new Collection();
 const foldersPath = path.join(__dirname, "commands");
 const commandFolders = fs.readdirSync(foldersPath);
@@ -50,14 +45,14 @@ bot.on("interactionCreate", async (interaction) => {
   const command = bot.commands.get(commandName);
 
   if (!command) {
-    console.error(`No command matching ${commandName} was found.`);
+    console.error(`No command matching '${commandName}' was found.`);
     return;
   }
 
   try {
     await command.execute(interaction);
   } catch (error) {
-    console.error(`Error executing ${commandName}:`);
+    console.error(`Error executing '${commandName}':`);
     console.error(error);
 
     const errorContent = {
@@ -72,50 +67,6 @@ bot.on("interactionCreate", async (interaction) => {
     }
   }
 });
-
-// TODO: move these to utils if needed
-// Checks if a string (or strings) appears in an array
-function contains(array, string) {
-  var strings = [];
-  if (string.indexOf(" ") >= 0) {
-    strings = string.split(/ +/);
-    for (i = 0; i < array.length; i++) {
-      if (
-        array[i].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}?=\-_`~()]/g, "") ==
-        strings[0].toLowerCase()
-      ) {
-        for (j = 1; j < strings.length; j++) {
-          i++;
-          if (
-            i >= array.length ||
-            array[i]
-              .toLowerCase()
-              .replace(/[.,\/#!$%\^&\*;:{}?=\-_`~()]/g, "") !=
-              strings[j].toLowerCase()
-          ) {
-            return false;
-          }
-        }
-        return true;
-      }
-    }
-  } else {
-    for (i = 0; i < array.length; i++) {
-      if (
-        array[i].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}?=\-_`~()]/g, "") ==
-        string.toLowerCase()
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-// Checks for a null or emptry string
-function isEmpty(string) {
-  return string == null || string.length === 0;
-}
 
 //  TODO: remove and create more commands
 // bot.on("message", async (message) => {
@@ -132,78 +83,6 @@ function isEmpty(string) {
 //       case "":
 //         if (args.length != 0) {
 //           message.reply(constants.general.noCommand);
-//         }
-//         break;
-//       case "exp":
-//       case "xp":
-//         if (args.length <= 1) {
-//           message.reply(
-//             "tell me the __difficulty rating__ of your success and your __character level__, and I shall give you your exp.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!exp m 1` or `!xp ni 5`"
-//           );
-//         } else {
-//           var expTable = [
-//             [10, 25, 50, 75, 100, 200],
-//             [25, 50, 100, 150, 200, 400],
-//             [50, 75, 150, 225, 400, 500],
-//             [75, 125, 250, 375, 500, 110],
-//             [125, 250, 500, 750, 1100, 1400],
-//             [250, 300, 600, 900, 1400, 1700],
-//             [300, 350, 750, 1100, 1700, 2100],
-//             [350, 450, 900, 1400, 2100, 2400],
-//             [450, 550, 1100, 1600, 2400, 2800],
-//             [550, 600, 1200, 1900, 2800, 3600],
-//           ];
-
-//           var difficulty = "";
-//           var level = 0;
-//           try {
-//             if (args.length >= 3) {
-//               level = parseInt(args[2]);
-//               if (args[0] == "very") {
-//                 difficulty = args[1] == "easy" ? "ve" : "vh";
-//               } else if (args[0] == "nearly") {
-//                 difficulty = "ni";
-//               }
-//             } else {
-//               level = parseInt(args[1]);
-//               if (args[0].length > 2) {
-//                 if (args[0] == "impossible") {
-//                   difficulty = "ni";
-//                 } else if (args[0] == "easy") {
-//                   difficulty = "e";
-//                 } else if (args[0] == "medium") {
-//                   difficulty = "m";
-//                 } else if (args[0] == "hard") {
-//                   difficulty = "h";
-//                 }
-//               }
-//             }
-//           } catch (err) {
-//             message.reply(
-//               "tell me the __difficulty rating__ of your success and your __character level__, and I shall give you your exp.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!exp m 1` or `!xp ni 5`"
-//             );
-//             break;
-//           }
-
-//           if (isEmpty(difficulty)) {
-//             message.reply(
-//               "didn't quite understand what your __difficulty rating__ is. Try one of the following options:\n**ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)"
-//             );
-//             break;
-//           }
-
-//           if (level <= 0) {
-//             message.reply(
-//               "make sure you're giving me a valid character level when begging for XP."
-//             );
-//             break;
-//           }
-
-//           var roll = difficultyToRoll(difficulty);
-//           var exp = expTable[level - 1][roll];
-//           message.reply(
-//             "each player who succeeded should receive " + exp + " XP."
-//           );
 //         }
 //         break;
 //       case "dc":

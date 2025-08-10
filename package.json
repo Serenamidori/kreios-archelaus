@@ -5,7 +5,7 @@
 	"main": "bot.js",
 	"author": "Gabriela Gonzalez (serenamidori)",
 	"dependencies": {
-		"discord.js": "^12.3.1",
+		"discord.js": "^14.21.0",
 		"dotenv": "^8.2.0",
 		"mongodb": "^3.6.2",
 		"mongoose": "^8.12.1",

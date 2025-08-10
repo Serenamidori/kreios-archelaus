@@ -10,12 +10,12 @@
     }
   },
   "oracle": {
-    "1": "no, and...",
-    "2": "no.",
-    "3": "no, but...",
-    "4": "yes, but...",
-    "5": "yes.",
-    "6": "yes, and..."
+    "1": "No, and...",
+    "2": "No.",
+    "3": "No, but...",
+    "4": "Yes, but...",
+    "5": "Yes.",
+    "6": "Yes, and..."
   },
   "diceRoller": [
     ["oh fuck, that's a ", "_eeeesh_, it's a "],

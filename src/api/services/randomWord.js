@@ -2,7 +2,7 @@ const BASE_URL = 'https://random-word-api.vercel.app/api';
 
 async function getWords(count = 2) {
   try {
-    console.log(`${BASE_URL}/word?${count}`)
+    // console.log(`${BASE_URL}/word?${count}`);
     const response = await fetch(`${BASE_URL}?words=${count}`);
         
     if (!response.ok) {

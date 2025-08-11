@@ -85,34 +85,6 @@ bot.on("interactionCreate", async (interaction) => {
 //           message.reply(constants.general.noCommand);
 //         }
 //         break;
-//       case "dc":
-//         if (args.length == 0) {
-//           message.reply(
-//             "tell me the difficulty rating of your situation, and I'll give you a DC for this check.\nOptions: **ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)\nex. `!dc m` or `!dc ni`"
-//           );
-//         } else {
-//           // TODO: make this reusable
-//           const length = args[0].length;
-//           if (length === 2 || length === 1) {
-//             difficulty = args[0];
-//           } else {
-//             // TODO: This needs to handle both one word and two word entries
-//             difficulty = args.slice(0, 2).join(" ");
-//           }
-//           // TODO: eventually allow the rest of the message to be included in the successful response
-//           dc = utils.calculations.calcDC(difficulty);
-
-//           if (dc < 0) {
-//             message.reply(
-//               "didn't quite understand what your __difficulty rating__ is. Try one of the following options:\n**ve** (very easy), **e** (easy), **m** (medium), **h** (hard), **vh** (very hard), **ni** (nearly impossible)"
-//             );
-//           } else {
-//             message.reply(
-//               "you must succeed on a DC " + dc + " for this check."
-//             );
-//           }
-//         }
-//         break;
 //       case "difficulty":
 //       case "diff":
 //       case "d":

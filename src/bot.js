@@ -68,124 +68,6 @@ bot.on("interactionCreate", async (interaction) => {
   }
 });
 
-//  TODO: remove and create more commands
-// bot.on("message", async (message) => {
-//   // Prevents Kreios from responding to his own messages
-//   if (message.author.id == bot.user.id) return;
-
-//   if (message.content.startsWith("!")) {
-//     const args = message.content.substring(1).split(/ +/);
-//     const cmd = args.shift().toLowerCase();
-
-// 		// TODO: executeCommand(command, message, args);
-
-//     switch (cmd) {
-//       case "":
-//         if (args.length != 0) {
-//           message.reply(constants.general.noCommand);
-//         }
-//         break;
-//       case "difficulty":
-//       case "diff":
-//       case "d":
-//         if (args.length == 0) {
-//           message.reply(
-//             "be sure to tell me how difficult _you_ think the situation is,\n**trivial (t)** - Not a challenge at all.\n**average (a)** - Some amount of challenge.\n**uncommon (u)** - More challenging than normal.\n**dire (d)** - Possibly more of a challenge than you can handle."
-//           );
-//         } else {
-//           var guess = "";
-//           var rollTable = [];
-
-//           switch (args[0]) {
-//             case "t":
-//             case "trivial":
-//               guess = "trivial";
-//               rollTable = ["0", "0", "1", "1", "1", "2"];
-//               break;
-//             case "a":
-//             case "average":
-//               guess = "average";
-//               rollTable = ["1", "1", "2", "2", "3", "3"];
-//               break;
-//             case "u":
-//             case "uncommon":
-//               guess = "uncommon";
-//               rollTable = ["1", "2", "2", "3", "3", "3"];
-//               break;
-//             case "d":
-//             case "dire":
-//               guess = "dire";
-//               rollTable = ["3", "3", "3", "4", "4", "5"];
-//               break;
-//           }
-
-//           var roll = rollTable[utils.random.rand(6) - 1];
-//           message.reply(
-//             "for this " +
-//               guess +
-//               " situation the difficulty is **" +
-//               difficultiesNames[roll] +
-//               "** (DC " +
-//               utils.calculations.calcDC(difficultiesCodes[roll], true) +
-//               ")."
-//           );
-//         }
-//         break;
-//       case "npc":
-//         if (args.length == 0) {
-//           message.reply(
-//             "be sure to specify what you'd like to know about this NPC.\n**attitude** - Gives the demeanor of the NPC towards you.\n**build [uncommon/rare/monster] [class]** - Creates a random NPC description to work with."
-//           );
-//         }
-//         // build
-//         if (args[0] == "build" || args[0] == "b") {
-//           const npcBuild = constants.npcBuild;
-//           var npc =
-//             "**New NPC**\n(if you need a name, ask Avrae with `!randname` or `!randname [race]`)";
-
-//           var raceArray = npcBuild[0];
-//           if (contains(args, "uncommon") || contains(args, "u")) {
-//             raceArray = raceArray.concat(npcBuild[1]);
-//           }
-//           if (contains(args, "rare") || contains(args, "r")) {
-//             raceArray = raceArray.concat(npcBuild[2]);
-//           }
-//           if (contains(args, "monster") || contains(args, "m")) {
-//             raceArray = npcBuild[2];
-//           }
-//           npc +=
-//             "```\n Race: " + raceArray[utils.random.rand(raceArray.length) - 1];
-
-//           if (contains(args, "class") || contains(args, "c")) {
-//             npc +=
-//               "\n Class: " +
-//               npcBuild[3][utils.random.rand(npcBuild[3].length) - 1];
-//           }
-//           //check for other args, otherwise default to only Race, Gender, Eye Color, Hair Color and Length, Height, Weight, and 1 Misc.
-//           npc +=
-//             "\n Gender: " +
-//             npcBuild[4][utils.random.rand(npcBuild[4].length) - 1] +
-//             "\n Hair Color: " +
-//             npcBuild[5][utils.random.rand(npcBuild[5].length) - 1] +
-//             "\n Hair Length: " +
-//             npcBuild[6][utils.random.rand(npcBuild[6].length) - 1] +
-//             "\n Eye Color: " +
-//             npcBuild[5][utils.random.rand(npcBuild[5].length) - 1] +
-//             "\n Height: " +
-//             npcBuild[7][utils.random.rand(npcBuild[7].length) - 1] +
-//             "\n Weight: " +
-//             npcBuild[8][utils.random.rand(npcBuild[8].length) - 1] +
-//             "\n Misc. Trait: " +
-//             npcBuild[9][utils.random.rand(npcBuild[9].length) - 1];
-
-//           npc = npc + "```";
-//           message.reply(npc);
-//         }
-//         // attitude
-//         if (args[0] == "attitude" || args[0] == "a") {
-//           message.reply(constants.npcAttitude[utils.random.rand(3) - 1]);
-//         }
-//         break;
 //       case "intervention":
 //         const interventions = constants.interventions;
 //         var responses = [
@@ -206,10 +88,7 @@ bot.on("interactionCreate", async (interaction) => {
 //             constants.twene[utils.random.rand(constants.twene.length - 1)]
 //         );
 //         break;
-//       case "flip":
-//         var coin = utils.random.rand(2) == 2 ? "heads" : "tails";
-//         message.reply("I flipped a coin for you, it was " + coin + ".");
-//         break;
+
 //       // TODO: Update the Commands and Intro, if needed
 //       // case 'commands':
 //       // 	message.channel.send('I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~');

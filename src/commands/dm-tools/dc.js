@@ -23,6 +23,6 @@ module.exports = {
     const base = interaction.options.getInteger("difficulty");
     const dc = base + utils.random.rand(5);
 
-    await interaction.reply(`You must succeed on a DC ${dc} for this check.`);
+    await interaction.reply(`This check is a **DC ${dc}**.`);
   },
 };

@@ -31,6 +31,6 @@ module.exports = {
     const level = interaction.options.getInteger("level");
     const xp = xpTable[level - 1][difficulty];
 
-    await interaction.reply(`Your level ${level} character would receive ${xp} XP for this encounter.`);
+    await interaction.reply(`Your level ${level} character would receive **${xp} XP**.`);
   },
 };

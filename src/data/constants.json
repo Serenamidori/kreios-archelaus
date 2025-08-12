@@ -1,14 +1,31 @@
 {
-  "general": {
-    "noCommand": "sorry, I'm unsure what you mean. Make sure not to add a space between `!` and your command.",
-    "nothingNevermind": "Nothing? Never mind then.",
-    "translatePersonality": {
-      "1": "normal",
-      "2": "kind",
-      "3": "flirty",
-      "4": "mean"
-    }
+  "diceRollerDialogue": {
+    "noDice": [
+      "Did you just use me as a calculator...?",
+      "Couldn't help but notice you didn't give me any dice to roll...",
+      "What, no dice?",
+      "It's okay, I know math is hard."
+    ],
+    "critSuccess": [
+      "Lucky you!",
+      "Nice crit!",
+      "You're welcome.",
+      "Can't get much higher than that, eh?"
+    ],
+    "critFail": [
+      "That's a little low, huh?",
+      "Guess it could be worse?",
+      "Not the crit you wanted, I imagine?",
+      "Hey, don't shoot the messenger."
+    ],
+    "critBoth": [
+      "Crits across the board, let's hope it's in your favor",
+      "That's some luck, huh?",
+      "What are the odds?",
+      "The dice giveth, the dice taketh away."
+    ]
   },
+
   "oracle": {
     "1": "No, and...",
     "2": "No.",
@@ -17,6 +34,14 @@
     "5": "Yes.",
     "6": "Yes, and..."
   },
+
+  "portents": [
+    "Use these words for inspiration",
+    "Here, try these words",
+    "Let these jog your imagination",
+    "Look, I'm not a dictionary, but I know some helpful words"
+  ],
+
   "xpTable": [
     [13, 25, 50, 75, 100, 200],
     [25, 50, 100, 150, 200, 400],
@@ -39,20 +64,7 @@
     [1200, 2400, 4900, 7300, 10900, 21800],
     [1400, 2800, 5700, 8500, 12700, 25400]
   ],
-  "diceRoller": [
-    ["oh fuck, that's a ", "_eeeesh_, it's a "],
-    ["good luck with a ", "oh well, can't do much with a ", "oof, that's a "],
-    ["you get a ", "it's a ", "I bestow you a "],
-    ["not bad, you got a ", "oh wow, that's a ", "nice, it's a "],
-    ["_yoooo_, it's a ", "oh damn, you got a "],
-    [
-      "Critical Fail! You rolled a natural 1, hope that roll wasn't important~ Your total is "
-    ],
-    ["Critical Success! You rolled a natural 20, lucky you! Your total is "],
-    [
-      "incredible, a natural 20 _and_ natural 1? Hope you were rolling with advantage! Your total is "
-    ]
-  ],
+
   "twene": [
     "Let's **increase a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element increases in scale or importance, potentially turning it into something that could be added to the Plot or Entity lists.",
     "Let's **decrease a simple element.**\n> An element is anything in the scene; spacial dimensions, NPCs, lighting conditions, weather, smells, the whole shebang. A simple element is something of minimal importance, something that on its own wouldn’t make a difference to how the scene plays out. This element decreases in scale or importance, meaning there is less of none of it in the scene.",
@@ -65,11 +77,13 @@
     "Let's try a **wild positive!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is positive, but because it can be a little obscure, you can use `!portent` to help decide what happens next.",
     "Let's try a **wild negative!**\n> This option allows you to go crazy with whatever idea first comes to mind. This wild option is negative, but because it can be a little obscure, you can use `!portent` to help decide what happens next"
   ],
+
   "npcAttitude": [
     "They are hostile towards you.",
     "They are neutral towards you.",
     "They are friendly towards you."
   ],
+
   "npcBuild": [
     ["human", "elf", "dwarf", "half-elf", "gnome", "halfling", "drow"],
     [
@@ -130,6 +144,7 @@
       "glasses"
     ]
   ],
+
   "interventions": [
     "New Entity\n> An entity refers to any person or group of persons that are remotely autonomous, not simply specific NPCs and monsters. For inspirations, I recommend using `!npc` commands or `!portent`",
     "Entity Positive\n> Something good happens to an entity, the specifics of which can be determined by asking questions using `!oracle`",
@@ -137,11 +152,5 @@
     "Advance Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Advancing a plot pushes an unresolved hook forward.",
     "Regress Plot\n> A plot is an unresolved story hook or thread that usually acts as a goal of some kind. Regressing a plot should help the adventure progress, just by hindering a certain goal or plot point.",
     "Wild\n> Something unexpected! This is the option that allows for sudden twists of fate. Because a wild Intervention is so vague in what it can represent, I recommend you use `!portent` to figure out what the heck it actually means."
-  ],
-  "portents": [
-    "Use these words for inspiration",
-    "Here, try these words",
-    "Let these jog your imagination",
-    "Look, I'm not a dictionary, but I know some helpful words"
   ]
 }

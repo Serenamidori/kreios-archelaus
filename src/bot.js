@@ -200,20 +200,6 @@ bot.on("interactionCreate", async (interaction) => {
 //             interventions[utils.random.rand(6) - 1]
 //         );
 //         break;
-//       case "p":
-//       case "portent":
-//         // TODO: Move this into message handling file
-//         const words = await api.randomWord.getWords();
-//         console.log(words);
-//         message.reply(
-//           constants.portents[utils.random.rand(constants.portents.length - 1)] +
-//             ': "' +
-//             words[0] +
-//             '" and "' +
-//             words[1] +
-//             '"'
-//         );
-//         break;
 //       case "twene":
 //         message.reply(
 //           "Ah, so things are not as expected? " +
@@ -223,84 +209,6 @@ bot.on("interactionCreate", async (interaction) => {
 //       case "flip":
 //         var coin = utils.random.rand(2) == 2 ? "heads" : "tails";
 //         message.reply("I flipped a coin for you, it was " + coin + ".");
-//         break;
-//       case "kroll":
-//         // set defaults
-//         var numbers = [];
-//         var total = 0;
-//         var count = 1;
-//         var sides = 20;
-//         var symbol;
-//         var bonus;
-//         var critSuccess = false;
-//         var critFail = false;
-//         // set up dice
-//         var dice = message.content.match(
-//           /(\d*)\s*[d|D]\s*(\d+)(\s*([\+|\-])\s*(\d+)+)*/
-//         );
-//         if (dice) {
-//           count = dice[1] ? dice[1] : count;
-//           sides = dice[2];
-//           symbol = dice[4];
-//           bonus = dice[5];
-//         }
-//         // handle d0 dice
-//         if (sides == 0) {
-//           message.reply("Look- it's fucking nothing!");
-//           return;
-//         }
-//         // roll all dice
-//         for (i = 0; i < count; i++) {
-//           numbers[i] = utils.random.rand(sides);
-//           total += numbers[i];
-//           // account for crits
-//           critSuccess = critSuccess || numbers[i] == sides;
-//           critFail = critFail || numbers[i] == 1;
-//         }
-//         // apply bonuses
-//         if (symbol) {
-//           if (symbol == "+") {
-//             total += parseInt(bonus);
-//           } else {
-//             total -= parseInt(bonus);
-//           }
-//         }
-//         // calculate percentage of success
-//         var max = sides * count;
-//         var index = 2; // default, 26-74%
-//         if (critSuccess && critFail) {
-//           // both crit success and crit fail
-//           index = 7;
-//         } else if (critSuccess && sides == 20) {
-//           // crit success
-//           index = 6;
-//         } else if (critFail && sides == 20) {
-//           // crit fail
-//           index = 5;
-//         } else if (total >= max * 0.9) {
-//           // 91-100%
-//           index = 4;
-//         } else if (total <= max * 0.1) {
-//           // 0-9%
-//           index = 0;
-//         } else if (total >= max * 0.75) {
-//           // 75-90%
-//           index = 3;
-//         } else if (total <= max * 0.25) {
-//           // 10-25%
-//           index = 1;
-//         }
-//         message.reply(
-//           utils.messageHandler.diceMessage(
-//             index,
-//             bonus,
-//             symbol,
-//             count,
-//             numbers,
-//             sides,
-//             total
-//           )
-//         );
 //         break;
 //       // TODO: Update the Commands and Intro, if needed
 //       // case 'commands':

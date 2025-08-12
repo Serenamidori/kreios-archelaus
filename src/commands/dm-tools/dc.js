@@ -4,7 +4,7 @@ const utils = require("../../utils");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("dc")
-    .setDescription("Ask Kreios to determine the DC for a skill check")
+    .setDescription("Ask Kreios for the DC for a skill check")
     .addIntegerOption((option) =>
       option
         .setName("difficulty")

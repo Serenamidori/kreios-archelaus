@@ -1,7 +1,7 @@
 require("dotenv").config();
 const fs = require("node:fs");
 const path = require("node:path");
-const { Client, Collection, GatewayIntentBits } = require("discord.js");
+const { Client, Collection, GatewayIntentBits, MessageFlags } = require("discord.js");
 
 const bot = new Client({
   intents: [
@@ -12,27 +12,33 @@ const bot = new Client({
 });
 
 bot.commands = new Collection();
-const foldersPath = path.join(__dirname, "commands");
-const commandFolders = fs.readdirSync(foldersPath);
 
-for (const folder of commandFolders) {
-  const commandsPath = path.join(foldersPath, folder);
-  const commandFiles = fs
-    .readdirSync(commandsPath)
-    .filter((file) => file.endsWith(".js"));
+const loadCommands = () => {
+  const foldersPath = path.join(__dirname, "commands");
+  const commandFolders = fs.readdirSync(foldersPath);
 
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
+  for (const folder of commandFolders) {
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs
+      .readdirSync(commandsPath)
+      .filter((file) => file.endsWith(".js"));
 
-    if ("data" in command && "execute" in command) {
-      bot.commands.set(command.data.name, command);
-      console.log(`Loaded command: ${command.data.name}`);
-    } else {
-      console.log(`Command ${filePath} is missing a "data" or "execute"`);
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      delete require.cache[require.resolve(filePath)];
+      const command = require(filePath);
+
+      if ("data" in command && "execute" in command) {
+        bot.commands.set(command.data.name, command);
+        console.log(`Loaded command: ${command.data.name}`);
+      } else {
+        console.warn(`Command ${filePath} is missing a "data" or "execute"`);
+      }
     }
   }
-}
+};
+
+loadCommands();
 
 bot.on("ready", () => {
   console.info(`Logged in as ${bot.user.tag}`);
@@ -52,57 +58,60 @@ bot.on("interactionCreate", async (interaction) => {
   try {
     await command.execute(interaction);
   } catch (error) {
-    console.error(`Error executing '${commandName}':`);
-    console.error(error);
+    console.error(`Error executing '${commandName}' by ${interaction.user.tag}:`, error);
 
     const errorContent = {
-      content: `Encountered an error attempting to execute "${commandName}".`,
-      ephemeral: true
-    }
+      content: `I'm not able to execute "${commandName}", try again later.`,
+      flags: MessageFlags.Ephemeral
+    };
 
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp(errorContent);
-    } else {
-      await interaction.reply(errorContent);
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(errorContent);
+      } else {
+        await interaction.reply(errorContent);
+      }
+    } catch (followUpError) {
+      console.error("Failed to send error message to user:", followUpError.message);
     }
   }
 });
 
-//       case "intervention":
-//         const interventions = constants.interventions;
-//         var responses = [
-//           "**Surprise!",
-//           "**Time for an",
-//           "**Look out!",
-//           "**BOO!",
-//         ];
-//         message.reply(
-//           responses[utils.random.rand(responses.length - 1)] +
-//             " Intervention:** " +
-//             interventions[utils.random.rand(6) - 1]
-//         );
-//         break;
-//       case "twene":
-//         message.reply(
-//           "Ah, so things are not as expected? " +
-//             constants.twene[utils.random.rand(constants.twene.length - 1)]
-//         );
-//         break;
 
-//       // TODO: Update the Commands and Intro, if needed
-//       // case 'commands':
-//       // 	message.channel.send('I will list the commands I understand. Be sure to use `!` or `/` before a command without spaces, unless otherwise stated:\n\n**roll (r)** - Dice roller in xdy format. [Be sure to only use `/` for this command, Avrae uses `!` for roll instead. Either dice is acceptable for gameplay]\n**flip (f)** - Coin flipper, I\'ll take a coin from my hoard and flip it for you.\n**oracle (o)** - The Oracle system. Ask a yes/no question with this command and I\'ll give you the answer.\n**npc (n)** - NPC options, attitude to see how NPCs react to you and build to create random descriptions.\n**portent (p)** - Portents, you receive two random words to help with inspiration.\n**twene (t)** - Table for When Everything is Not as Expected, you can use this when something in the scene isn\'t what you expected (obviously). I\'ll give you a twist and you can decipher what it means.\n**intro (i)** - A short description of myself and what I do.\n**credits (c)** - Credits to artists and systems that I use.\n**help (h)** - _This~_\n\nIf you address me by name, DM or Dungeon Master, Ill come to your beck and call. ~~Not that I have much of a choice.~~');
-//       // 	break;
-//       // case 'intro':
-//       // 	message.channel.send('I am Kreios Archelaus, your new Dungeon Master. I may not be as talkative or descriptive as your _normal_ DM, but I will help to shape your world.\n\nMy purpose is to answer your questions as you play through campaigns by yourself or with a party. You will be the one(s) building your world, I\'m simply here to tell you \'yes\' or \'no\'. Out of the two of us, you\'ve got the most creativity here.\nI work on a system called MUNE (The Madey Upy Namey Emulator), where we work on Second Hand Creativity. If you need more information, you can read about it here: https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q \nI have a few commands that start with `!` and `/`, you can read about them with `!help` or `/help`. But you may also talk to me normally, and I\'ll respond when I see something I can respond to.');
-//       // 	break;
-//       case "credits":
-//         message.channel.send(
-//           "Code by SerenaMidori [https://twitter.com/SerenaMidori]\nCharacter Design by Cassivel [https://www.deviantart.com/cassivel] \nMUNE System by /u/bionicle_fanatic [https://homebrewery.naturalcrit.com/share/rkmo0t9k4Q]"
-//         );
-//         break;
-//     }
-//   }
-// });
+bot.on("error", (error) => {
+  console.error("[discord.js error]", error);
+});
 
-bot.login(process.env.TOKEN);
+bot.on("warn", (warning) => {
+  console.warn("[discord.js warning]", warning);
+});
+
+const startBot = async () => {
+  try {
+    if (!process.env.TOKEN) {
+      console.error("ERROR: Missing TOKEN");
+      process.exit(1);
+    }
+    
+    console.info("Logging in...");
+    await bot.login(process.env.TOKEN);
+    
+  } catch (error) {
+    console.error("Log in failed", error);
+    process.exit(1);
+  }
+};
+
+process.on("SIGINT", () => {
+  console.log("\nShutting down Kreios...");
+  bot.destroy();
+  process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+  console.log("\nReceived SIGTERM, shutting down Kreios...");
+  bot.destroy();
+  process.exit(0);
+});
+
+startBot();

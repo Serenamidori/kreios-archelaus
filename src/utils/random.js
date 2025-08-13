@@ -7,7 +7,6 @@ function rand(sides) {
 	}
 };
 
-
 module.exports = {
 	rand
 }

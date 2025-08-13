@@ -1,13 +1,13 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require("discord.js");
 const constants = require("../../data/constants.json");
-const utils = require('../../utils');
+const utils = require("../../utils");
 
 function isValid(str) {
   return /^(\d+[dD]\d+|[+-]?\d+)(\s*[+-]\s*(\d+[dD]\d+|\d+))*$/.test(str);
 }
 
 function getComponents(str) {
-  const cleanedStr = str.replace(/\s/g, '');
+  const cleanedStr = str.replace(/\s/g, "");
   const components = cleanedStr.match(/[+-]?(?:\d+[dD]\d+|\d+)/g); 
   return components || [];
 }
@@ -18,33 +18,33 @@ function isDiceRoll(str) {
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('roll')
-    .setDescription('Roll some dice')
+    .setName("roll")
+    .setDescription("Roll some dice")
     .addStringOption((option) =>
-      option.setName('dice')
-        .setDescription('Know what dice you want to roll? (ex. 1d20)')
+      option.setName("dice")
+        .setDescription("Know what dice you want to roll? (ex. 1d20)")
         .setRequired(false)
     ),
   async execute(interaction) {
-    const diceToRoll = interaction.options.getString('dice') || '1d20';
+    const diceToRoll = interaction.options.getString("dice") || "1d20";
     
     if (!isValid(diceToRoll)) {
-      await interaction.reply('I didn\'t quite understand, make sure you\'re sending me a valid dice roll.');
+      await interaction.reply("I didn't quite understand, make sure you're sending me a valid dice roll.");
       return;
     }
 
     const diceToRollArr = getComponents(diceToRoll);
     let total = 0;
-    let calculation = '';
+    let calculation = "";
     let critSuccess = false;
     let critFail = false;
 
     diceToRollArr.forEach(function(d) {
-      let details = '';
+      let details = "";
       let label;
 
-      const isNegative = d.startsWith('-');
-      const isPositive = d.startsWith('+');
+      const isNegative = d.startsWith("-");
+      const isPositive = d.startsWith("+");
       const diceStr = (isNegative || isPositive) ? d.slice(1) : d;
 
       if (isNegative) label = ` - ${diceStr}`;
